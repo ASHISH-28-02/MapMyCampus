@@ -187,7 +187,7 @@ async def handle_query(request: QueryRequest):
     # --- Case 3: Not Understood ---
     return {
         "type": "error",
-        "message": "🤖 Sorry, I couldn't understand. Please ask for a single location ('where is the library?') or a route ('hostel to academic block')."
+        "message": "🤖 Please ask for a single location ('where is the library?') or a route ('hostel to academic block')."
     }
 
 # --- Root Endpoint (for testing) ---

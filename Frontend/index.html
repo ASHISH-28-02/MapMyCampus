@@ -3,11 +3,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>IISER TVM Campus Navigator</title>
+    <title>MapMyCampus</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Luckiest+Guy&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
+        /* Custom Color Palette */
+        :root {
+            --primary-color: #00796B; /* A deep teal that complements maps */
+            --primary-light: #E0F2F1;
+            --background-color: #F5F7FA;
+            --chat-panel-bg: #FFFFFF;
+            --user-bubble-bg: #E3F2FD; /* A soft blue for the user */
+            --bot-bubble-bg: #E8F5E9;  /* A soft green for the bot */
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --border-color: #E0E0E0;
+        }
+
         /* General Styling */
         html { box-sizing: border-box; }
         *, *:before, *:after { box-sizing: inherit; }
@@ -15,7 +28,7 @@
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f3f4f6;
+            background-color: var(--background-color);
             display: flex;
             flex-direction: row;
             height: 100vh;
@@ -28,11 +41,11 @@
             max-width: 450px;
             min-width: 320px;
             height: 100vh;
-            background-color: #fff;
+            background-color: var(--chat-panel-bg);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            border-right: 1px solid #e5e7eb;
+            box-shadow: 0 0 25px rgba(0,0,0,0.05);
+            border-right: 1px solid var(--border-color);
             position: relative;
             transition: min-width 0.3s ease-in-out, width 0.3s ease-in-out, padding 0.3s ease-in-out;
         }
@@ -48,34 +61,32 @@
             min-width: 0;
             padding: 0;
             border-right: none;
-            overflow: hidden;
         }
         .chat-container.collapsed > * { visibility: hidden; }
         .chat-container.collapsed #collapse-btn { visibility: visible; }
         
         /* Chat Header */
         .chat-header {
-            padding: 1.25rem 1.5rem;
-            background-color: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 1.5rem;
+            background-color: var(--chat-panel-bg);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 0.75rem;
             flex-shrink: 0;
         }
         .chat-header h1 {
             margin: 0;
-            font-family: 'Luckiest Guy', cursive;
-            font-size: 1.75rem;
-            font-weight: 400;
-            color: #2563eb;
-            letter-spacing: 1.5px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
         }
         
         /* Collapse Button */
         #collapse-btn {
-            background: #e5e7eb;
-            border: none;
+            background: var(--chat-panel-bg);
+            border: 1px solid var(--border-color);
             border-radius: 50%;
             width: 32px;
             height: 32px;
@@ -83,23 +94,17 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.3s ease-in-out, right 0.3s ease-in-out, left 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out;
             position: absolute;
             right: -16px;
             top: 20px;
             z-index: 10;
         }
-        #collapse-btn:hover { background-color: #d1d5db; }
-        #collapse-btn svg {
-            width: 20px;
-            height: 20px;
-            color: #4b5563;
-            transition: transform 0.3s ease-in-out;
-        }
+        #collapse-btn:hover { background-color: #f1f1f1; transform: scale(1.1); }
+        #collapse-btn svg { width: 20px; height: 20px; color: var(--text-secondary); transition: transform 0.3s ease-in-out; }
         .chat-container.collapsed #collapse-btn {
             right: auto;
             left: 10px;
-            background-color: #fff;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         .chat-container.collapsed #collapse-btn svg { transform: rotate(180deg); }
@@ -107,28 +112,79 @@
         /* Chat Messages Area */
         .messages {
             flex: 1;
-            padding: 1rem;
+            padding: 1.5rem;
             overflow-y: auto;
-            background-color: #fff;
+            background-color: var(--background-color);
         }
-        #messages-container { display: flex; flex-direction: column; gap: 1rem; }
-        .messages::-webkit-scrollbar { width: 8px; }
-        .messages::-webkit-scrollbar-track { background: #f1f5f9; }
-        .messages::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        #messages-container { display: flex; flex-direction: column; gap: 1.25rem; }
+        .messages::-webkit-scrollbar { width: 6px; }
+        .messages::-webkit-scrollbar-track { background: transparent; }
+        .messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
         
         /* Individual Messages & Input Area */
-        .message-wrapper { display: flex; align-items: flex-start; gap: 0.625rem; max-width: 90%; }
-        .message-wrapper.user { justify-content: flex-end; align-self: flex-end; }
-        .message-bubble { display: flex; flex-direction: column; width: fit-content; max-width: 100%; line-height: 1.5; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; }
-        .message-bubble.bot { background-color: #dbeafe; border-radius: 0 0.75rem 0.75rem 0.75rem; }
-        .message-bubble.user { background-color: #e5e7eb; border-radius: 0.75rem 0 0.75rem 0.75rem; }
-        .message-sender { font-size: 0.875rem; font-weight: 600; color: #111827; }
-        .message-text { font-size: 0.875rem; font-weight: 400; padding-top: 0.25rem; color: #1f2937; }
-        .input-area { padding: 1rem; background-color: #f9fafb; border-top: 1px solid #e5e7eb; display: flex; align-items: center; flex-shrink: 0; }
-        #userInput { width: 100%; padding: 0.5rem 1rem; border: 1px solid #d1d5db; border-radius: 9999px; transition: box-shadow 0.2s; }
-        #userInput:focus { outline: none; box-shadow: 0 0 0 2px #3b82f6; }
-        .send-button { margin-left: 0.75rem; padding: 0.5rem 1.5rem; background-color: #2563eb; color: white; font-weight: 600; border-radius: 9999px; border: none; cursor: pointer; transition: background-color 0.3s; }
-        .send-button:hover { background-color: #1d4ed8; }
+        .message-wrapper { display: flex; flex-direction: column; max-width: 90%; }
+        .message-wrapper.user { align-self: flex-end; align-items: flex-end; }
+        .message-wrapper.bot { align-self: flex-start; align-items: flex-start; }
+
+        .message-sender {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 0 0 0.25rem 0;
+            padding: 0 0.5rem;
+        }
+        
+        .message-bubble { 
+            line-height: 1.5; 
+            padding: 0.75rem 1rem; 
+            border-radius: 1rem;
+            width: fit-content;
+        }
+        .message-bubble.bot { background-color: var(--bot-bubble-bg); border-top-left-radius: 0; }
+        .message-bubble.user { background-color: var(--user-bubble-bg); border-top-right-radius: 0; }
+        
+        .message-text { font-size: 1rem; font-weight: 400; color: var(--text-primary); margin: 0; }
+        
+        .input-area { 
+            padding: 1rem 1.5rem; 
+            background-color: var(--chat-panel-bg); 
+            border-top: 1px solid var(--border-color); 
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+            flex-shrink: 0; 
+        }
+        #userInput { 
+            flex-grow: 1; 
+            padding: 0.75rem 1rem; 
+            border: 1px solid var(--border-color); 
+            border-radius: 9999px; 
+            transition: box-shadow 0.2s; 
+            font-size: 1rem; 
+        }
+        #userInput:focus { 
+            outline: none; 
+            box-shadow: 0 0 0 3px var(--primary-light); 
+            border-color: var(--primary-color); 
+        }
+        
+        .send-button { 
+            width: 48px; 
+            height: 48px; 
+            background-color: var(--primary-color); 
+            color: white; 
+            border-radius: 50%; 
+            border: none; 
+            cursor: pointer; 
+            transition: background-color 0.3s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-shrink: 0; 
+        }
+        .send-button:hover { background-color: #004D40; }
+        .send-button svg { width: 24px; height: 24px; }
+
         .thinking-bubble::after { content: '...'; display: inline-block; animation: thinking 1.5s infinite; }
         @keyframes thinking { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } 100% { content: '.'; } }
     </style>
@@ -142,21 +198,20 @@
             </svg>
         </button>
         <div class="chat-header">
-            <h1>CAMPUS CHAT</h1>
+            <h1>MapMyCampus</h1>
         </div>
         <div class="messages">
             <div id="messages-container">
-                <div class="message-wrapper">
-                    <div class="message-bubble bot">
-                        <p class="message-sender">Navigator Bot</p>
-                        <p class="message-text">Welcome! Ask for a location (e.g., "where is lhc?") or a route ("psb to bsb").</p>
-                    </div>
-                </div>
+                <!-- Messages will be dynamically inserted here -->
             </div>
         </div>
         <div class="input-area">
             <input type="text" id="userInput" placeholder="Ask for a location or route..." onkeydown="if(event.key === 'Enter') sendMessage()"/>
-            <button onclick="sendMessage()" class="send-button">Send</button>
+            <button onclick="sendMessage()" class="send-button" title="Send message">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.949a.75.75 0 00.95.574l3.11-1.555a.5.5 0 01.525.525l-1.555 3.11a.75.75 0 00.574.95l4.949 1.414a.75.75 0 00.95-.826l-2.289-7.927a.75.75 0 00-.95-.574l-7.927-2.289z" />
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -166,41 +221,36 @@
         // --- Global Variables ---
         let map, directionsService, directionsRenderer;
         let activeMarkers = [];
-        // The backend server address. Change this if your backend is running elsewhere.
         const BACKEND_URL = "http://127.0.0.1:8000"; 
         const IISER_TVM_CENTER = { lat: 8.682478, lng: 77.135406 };
 
         // --- Map Initialization ---
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 16,
-                center: IISER_TVM_CENTER,
-                mapTypeId: 'hybrid',
-                disableDefaultUI: true,
-                zoomControl: true,
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: true,
+                zoom: 16, center: IISER_TVM_CENTER, mapTypeId: 'hybrid',
+                disableDefaultUI: true, zoomControl: true, mapTypeControl: false,
+                streetViewControl: false, fullscreenControl: true,
             });
 
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer({
                 suppressMarkers: false,
-                polylineOptions: { strokeColor: "#0ea5e9", strokeWeight: 5, strokeOpacity: 0.8 }
+                polylineOptions: { strokeColor: "#00796B", strokeWeight: 6, strokeOpacity: 0.9 }
             });
             directionsRenderer.setMap(map);
 
-            // Setup for collapsible chat
             const collapseBtn = document.getElementById('collapse-btn');
             const chatContainer = document.getElementById('chat-container');
             collapseBtn.addEventListener('click', () => {
                 chatContainer.classList.toggle('collapsed');
-                // Give the UI time to reflow before resizing the map
                 setTimeout(() => {
                     google.maps.event.trigger(map, 'resize');
-                    map.setCenter(IISER_TVM_CENTER); // Re-center the map
-                }, 300); // Should match the CSS transition duration
+                    map.setCenter(IISER_TVM_CENTER);
+                }, 300);
             });
+            
+            // Add the initial welcome message
+            addMessage("Bot", 'Welcome! Ask for a location (e.g., "where is lhc?") or a route ("psb to bsb").');
         }
 
         // --- Map Manipulation Functions ---
@@ -230,9 +280,7 @@
             map.setCenter({ lat: loc.lat, lng: loc.lng });
             map.setZoom(18);
             const marker = new google.maps.Marker({
-                position: { lat: loc.lat, lng: loc.lng },
-                map,
-                title: loc.name,
+                position: { lat: loc.lat, lng: loc.lng }, map, title: loc.name,
                 animation: google.maps.Animation.DROP
             });
             activeMarkers.push(marker);
@@ -243,7 +291,7 @@
             const input = document.getElementById("userInput");
             const msg = input.value.trim();
             if (!msg) return;
-            addMessage("You", msg);
+            addMessage("User", msg);
             input.value = "";
             handleQuery(msg);
         }
@@ -252,10 +300,16 @@
             const messagesContainer = document.getElementById("messages-container");
             const messageWrapper = document.createElement("div");
             if (messageId) messageWrapper.id = messageId;
-            const isUser = sender === "You";
-            messageWrapper.className = isUser ? 'message-wrapper user' : 'message-wrapper';
-            const bubbleClass = isUser ? 'message-bubble user' : 'message-bubble bot';
-            messageWrapper.innerHTML = `<div class="${bubbleClass}"><p class="message-sender">${sender}</p><p class="message-text">${text}</p></div>`;
+            
+            const isUser = sender === "User";
+            messageWrapper.className = isUser ? 'message-wrapper user' : 'message-wrapper bot';
+
+            messageWrapper.innerHTML = `
+                <p class="message-sender">${sender}</p>
+                <div class="message-bubble ${isUser ? 'user' : 'bot'}">
+                    <p class="message-text">${text}</p>
+                </div>`;
+            
             messagesContainer.appendChild(messageWrapper);
             messagesContainer.parentElement.scrollTop = messagesContainer.parentElement.scrollHeight;
         }
@@ -290,7 +344,6 @@
 
                 const data = await response.json();
 
-                // Process the response from the backend
                 switch (data.type) {
                     case 'location':
                         showLocationMarker(data);
@@ -314,7 +367,7 @@
         }
     </script>
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDAuOW_tGyVyoUa2IpCFHYQ9wZU6vDLeSw&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap">
     </script>
     <!-- 
         IMPORTANT: Replace YOUR_GOOGLE_MAPS_API_KEY with your actual Google Maps JavaScript API key.
