@@ -1,0 +1,13 @@
+# Python virtual environment
+.venv/
+venv/
+__pycache__/
+
+# Environment variables
+.env
+
+# VS Code settings
+.vscode/
+
+# IDE files
+.idea/
