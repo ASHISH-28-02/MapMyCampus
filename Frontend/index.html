@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>IISER TVM Campus Navigator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Luckiest+Guy&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        /* General Styling */
+        html { box-sizing: border-box; }
+        *, *:before, *:after { box-sizing: inherit; }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Layout Containers */
+        .chat-container {
+            width: 35%;
+            max-width: 450px;
+            min-width: 320px;
+            height: 100vh;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-right: 1px solid #e5e7eb;
+            position: relative;
+            transition: min-width 0.3s ease-in-out, width 0.3s ease-in-out, padding 0.3s ease-in-out;
+        }
+        #map {
+            flex-grow: 1;
+            height: 100vh;
+            transition: width 0.3s ease-in-out;
+        }
+
+        /* Collapsed State */
+        .chat-container.collapsed {
+            width: 0;
+            min-width: 0;
+            padding: 0;
+            border-right: none;
+            overflow: hidden;
+        }
+        .chat-container.collapsed > * { visibility: hidden; }
+        .chat-container.collapsed #collapse-btn { visibility: visible; }
+        
+        /* Chat Header */
+        .chat-header {
+            padding: 1.25rem 1.5rem;
+            background-color: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .chat-header h1 {
+            margin: 0;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.75rem;
+            font-weight: 400;
+            color: #2563eb;
+            letter-spacing: 1.5px;
+        }
+        
+        /* Collapse Button */
+        #collapse-btn {
+            background: #e5e7eb;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.3s ease-in-out, right 0.3s ease-in-out, left 0.3s ease-in-out;
+            position: absolute;
+            right: -16px;
+            top: 20px;
+            z-index: 10;
+        }
+        #collapse-btn:hover { background-color: #d1d5db; }
+        #collapse-btn svg {
+            width: 20px;
+            height: 20px;
+            color: #4b5563;
+            transition: transform 0.3s ease-in-out;
+        }
+        .chat-container.collapsed #collapse-btn {
+            right: auto;
+            left: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .chat-container.collapsed #collapse-btn svg { transform: rotate(180deg); }
+        
+        /* Chat Messages Area */
+        .messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+        #messages-container { display: flex; flex-direction: column; gap: 1rem; }
+        .messages::-webkit-scrollbar { width: 8px; }
+        .messages::-webkit-scrollbar-track { background: #f1f5f9; }
+        .messages::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        
+        /* Individual Messages & Input Area */
+        .message-wrapper { display: flex; align-items: flex-start; gap: 0.625rem; max-width: 90%; }
+        .message-wrapper.user { justify-content: flex-end; align-self: flex-end; }
+        .message-bubble { display: flex; flex-direction: column; width: fit-content; max-width: 100%; line-height: 1.5; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; }
+        .message-bubble.bot { background-color: #dbeafe; border-radius: 0 0.75rem 0.75rem 0.75rem; }
+        .message-bubble.user { background-color: #e5e7eb; border-radius: 0.75rem 0 0.75rem 0.75rem; }
+        .message-sender { font-size: 0.875rem; font-weight: 600; color: #111827; }
+        .message-text { font-size: 0.875rem; font-weight: 400; padding-top: 0.25rem; color: #1f2937; }
+        .input-area { padding: 1rem; background-color: #f9fafb; border-top: 1px solid #e5e7eb; display: flex; align-items: center; flex-shrink: 0; }
+        #userInput { width: 100%; padding: 0.5rem 1rem; border: 1px solid #d1d5db; border-radius: 9999px; transition: box-shadow 0.2s; }
+        #userInput:focus { outline: none; box-shadow: 0 0 0 2px #3b82f6; }
+        .send-button { margin-left: 0.75rem; padding: 0.5rem 1.5rem; background-color: #2563eb; color: white; font-weight: 600; border-radius: 9999px; border: none; cursor: pointer; transition: background-color 0.3s; }
+        .send-button:hover { background-color: #1d4ed8; }
+        .thinking-bubble::after { content: '...'; display: inline-block; animation: thinking 1.5s infinite; }
+        @keyframes thinking { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } 100% { content: '.'; } }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container" id="chat-container">
+        <button id="collapse-btn" title="Toggle chat panel">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+        </button>
+        <div class="chat-header">
+            <h1>CAMPUS CHAT</h1>
+        </div>
+        <div class="messages">
+            <div id="messages-container">
+                <div class="message-wrapper">
+                    <div class="message-bubble bot">
+                        <p class="message-sender">Navigator Bot</p>
+                        <p class="message-text">Welcome! Ask for a location (e.g., "where is lhc?") or a route ("psb to bsb").</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Ask for a location or route..." onkeydown="if(event.key === 'Enter') sendMessage()"/>
+            <button onclick="sendMessage()" class="send-button">Send</button>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+        // --- Global Variables ---
+        let map, directionsService, directionsRenderer;
+        let activeMarkers = [];
+        // The backend server address. Change this if your backend is running elsewhere.
+        const BACKEND_URL = "http://127.0.0.1:8000"; 
+        const IISER_TVM_CENTER = { lat: 8.682478, lng: 77.135406 };
+
+        // --- Map Initialization ---
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 16,
+                center: IISER_TVM_CENTER,
+                mapTypeId: 'hybrid',
+                disableDefaultUI: true,
+                zoomControl: true,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: true,
+            });
+
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                suppressMarkers: false,
+                polylineOptions: { strokeColor: "#0ea5e9", strokeWeight: 5, strokeOpacity: 0.8 }
+            });
+            directionsRenderer.setMap(map);
+
+            // Setup for collapsible chat
+            const collapseBtn = document.getElementById('collapse-btn');
+            const chatContainer = document.getElementById('chat-container');
+            collapseBtn.addEventListener('click', () => {
+                chatContainer.classList.toggle('collapsed');
+                // Give the UI time to reflow before resizing the map
+                setTimeout(() => {
+                    google.maps.event.trigger(map, 'resize');
+                    map.setCenter(IISER_TVM_CENTER); // Re-center the map
+                }, 300); // Should match the CSS transition duration
+            });
+        }
+
+        // --- Map Manipulation Functions ---
+        function clearMap() {
+            activeMarkers.forEach(marker => marker.setMap(null));
+            activeMarkers = [];
+            directionsRenderer.setDirections({ routes: [] });
+        }
+
+        function showRoute(origin, destination) {
+            const request = {
+                origin: { lat: origin.lat, lng: origin.lng },
+                destination: { lat: destination.lat, lng: destination.lng },
+                travelMode: google.maps.TravelMode.WALKING
+            };
+            directionsService.route(request, (result, status) => {
+                if (status === "OK") {
+                    directionsRenderer.setDirections(result);
+                } else {
+                    console.error("Directions request failed due to " + status);
+                    addMessage("Bot", "😥 Could not calculate the route. Please try again.");
+                }
+            });
+        }
+
+        function showLocationMarker(loc) {
+            map.setCenter({ lat: loc.lat, lng: loc.lng });
+            map.setZoom(18);
+            const marker = new google.maps.Marker({
+                position: { lat: loc.lat, lng: loc.lng },
+                map,
+                title: loc.name,
+                animation: google.maps.Animation.DROP
+            });
+            activeMarkers.push(marker);
+        }
+
+        // --- Chat UI Functions ---
+        function sendMessage() {
+            const input = document.getElementById("userInput");
+            const msg = input.value.trim();
+            if (!msg) return;
+            addMessage("You", msg);
+            input.value = "";
+            handleQuery(msg);
+        }
+
+        function addMessage(sender, text, messageId = null) {
+            const messagesContainer = document.getElementById("messages-container");
+            const messageWrapper = document.createElement("div");
+            if (messageId) messageWrapper.id = messageId;
+            const isUser = sender === "You";
+            messageWrapper.className = isUser ? 'message-wrapper user' : 'message-wrapper';
+            const bubbleClass = isUser ? 'message-bubble user' : 'message-bubble bot';
+            messageWrapper.innerHTML = `<div class="${bubbleClass}"><p class="message-sender">${sender}</p><p class="message-text">${text}</p></div>`;
+            messagesContainer.appendChild(messageWrapper);
+            messagesContainer.parentElement.scrollTop = messagesContainer.parentElement.scrollHeight;
+        }
+
+        function updateMessage(messageId, newHtml) {
+            const messageElement = document.getElementById(messageId);
+            if (messageElement) {
+                const textElement = messageElement.querySelector('.message-text');
+                if (textElement) {
+                    textElement.innerHTML = newHtml;
+                    textElement.classList.remove('thinking-bubble');
+                }
+            }
+        }
+
+        // --- Core Logic: Communicating with the Backend ---
+        async function handleQuery(msg) {
+            clearMap();
+            const thinkingMsgId = `bot-msg-${Date.now()}`;
+            addMessage("Bot", "<span class='thinking-bubble'>Thinking</span>", thinkingMsgId);
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: msg })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Backend error: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Process the response from the backend
+                switch (data.type) {
+                    case 'location':
+                        showLocationMarker(data);
+                        updateMessage(thinkingMsgId, `📍 ${data.name} is marked on the map. <br><br> ${data.description}`);
+                        break;
+                    case 'route':
+                        showRoute(data.from, data.to);
+                        updateMessage(thinkingMsgId, `🗺️ Showing walking route from ${data.from.name} to ${data.to.name}.`);
+                        break;
+                    case 'error':
+                        updateMessage(thinkingMsgId, data.message);
+                        break;
+                    default:
+                        throw new Error("Unknown response type from backend.");
+                }
+
+            } catch (error) {
+                console.error("Failed to handle query:", error);
+                updateMessage(thinkingMsgId, "😥 Sorry, something went wrong. I couldn't connect to my brain. Please try again later.");
+            }
+        }
+    </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDAuOW_tGyVyoUa2IpCFHYQ9wZU6vDLeSw&callback=initMap">
+    </script>
+    <!-- 
+        IMPORTANT: Replace YOUR_GOOGLE_MAPS_API_KEY with your actual Google Maps JavaScript API key.
+        It is recommended to restrict this key to your website's domain in the Google Cloud Console.
+    -->
+</body>
+</html>
