@@ -20,7 +20,7 @@ body {
     padding: 0;
     background-color: var(--background-color);
     display: flex;
-    flex-direction: row;
+    flex-direction: row; /* Default for desktop: chat and map side-by-side */
     height: 100vh;
     overflow: hidden;
 }
@@ -30,7 +30,7 @@ body {
     width: 35%;
     max-width: 450px;
     min-width: 320px;
-    height: 100vh;
+    height: 100vh; /* Full height on desktop */
     background-color: var(--chat-panel-bg);
     display: flex;
     flex-direction: column;
@@ -41,7 +41,7 @@ body {
 }
 #map {
     flex-grow: 1;
-    height: 100vh;
+    height: 100vh; /* Full height on desktop */
     transition: width 0.3s ease-in-out;
 }
 
@@ -77,7 +77,7 @@ body {
 #collapse-btn {
     background: var(--chat-panel-bg);
     border: 1px solid var(--border-color);
-    border-radius: 50%;
+    border-radius: 50%; /* Circular on desktop */
     width: 32px;
     height: 32px;
     display: flex;
@@ -86,18 +86,26 @@ body {
     cursor: pointer;
     transition: all 0.3s ease-in-out;
     position: absolute;
-    right: -16px;
+    /* --- MODIFICATION START --- */
+    /* Position the button inside the chat-container on the right */
+    right: 10px; /* Or adjust as needed for desired padding from the right edge */
+    /* --- MODIFICATION END --- */
     top: 20px;
     z-index: 10;
 }
 #collapse-btn:hover { background-color: #f1f1f1; transform: scale(1.1); }
 #collapse-btn svg { width: 20px; height: 20px; color: var(--text-secondary); transition: transform 0.3s ease-in-out; }
+
+/* Desktop collapse state - arrow points right (180deg from original left) */
 .chat-container.collapsed #collapse-btn {
-    right: auto;
-    left: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    right: auto; /* Remove the 'right' property from the open state */
+    left: 10px; /* Position to the left of the collapsed chat container, as before */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Keep the shadow when collapsed */
 }
-.chat-container.collapsed #collapse-btn svg { transform: rotate(180deg); }
+.chat-container.collapsed #collapse-btn svg {
+    transform: rotate(180deg); /* Arrow points right when chat is collapsed on desktop */
+}
+
 
 /* Chat Messages Area */
 .messages {
@@ -177,3 +185,117 @@ body {
 
 .thinking-bubble::after { content: '...'; display: inline-block; animation: thinking 1.5s infinite; }
 @keyframes thinking { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } 100% { content: '.'; } }
+
+/* --- Media Queries for Responsiveness --- */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column; /* Chat on top, map on bottom */
+        overflow-y: auto; /* Allow scrolling on the entire page */
+    }
+
+    .chat-container {
+        width: 100%; /* Full width for chat on mobile */
+        max-width: none; /* Remove max-width constraint */
+        min-width: unset; /* Remove min-width constraint */
+        height: 60vh; /* Chat takes 60% of viewport height */
+        border-right: none; /* No border on the right */
+        border-bottom: 1px solid var(--border-color); /* Add border to bottom */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05); /* Adjust shadow for bottom */
+        order: 1; /* Ensure chat is always at the top (before map) */
+    }
+
+    #map {
+        width: 100%; /* Full width for map on mobile */
+        height: 40vh; /* Map takes 40% of viewport height */
+        order: 2; /* Ensure map is always at the bottom (after chat) */
+    }
+
+    /* Adjust collapse button for mobile view - make it desktop-like */
+    #collapse-btn {
+        right: 10px; /* Position relative to the chat-container */
+        top: 10px; /* Adjust top position */
+        /* Revert to desktop styles */
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        background: var(--chat-panel-bg);
+        border: 1px solid var(--border-color);
+        padding: 0; /* Remove mobile padding */
+        color: unset; /* Remove mobile color */
+    }
+
+    #collapse-btn svg {
+        color: var(--text-secondary); /* Revert SVG color */
+        /* For the mobile view, we want the arrow to point DOWN when open,
+           and UP when collapsed. Original SVG points left.
+        */
+        transform: rotate(270deg); /* Arrow points down when chat is open on mobile */
+    }
+
+    /* Styles when chat is collapsed on mobile */
+    .chat-container.collapsed {
+        height: 50px; /* Show only the header/collapse button area */
+        width: 100%; /* Still full width */
+        min-height: unset;
+        padding: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color); /* Maintain bottom border */
+        overflow: hidden; /* Hide content */
+    }
+
+    .chat-container.collapsed #collapse-btn {
+        right: 10px; /* Keep button on the right */
+        left: auto; /* Remove left positioning */
+        top: 10px; /* Adjust top positioning for collapsed state */
+        box-shadow: none; /* Remove shadow */
+    }
+
+    .chat-container.collapsed #collapse-btn svg {
+        transform: rotate(90deg); /* Arrow points up when chat is collapsed on mobile */
+    }
+
+    /* Ensure header remains visible when collapsed on mobile */
+    .chat-container.collapsed .chat-header {
+        visibility: visible;
+        display: flex; /* Ensure it's still flex to center content */
+        align-items: center;
+        justify-content: space-between; /* Space out title and collapse button if both visible */
+        padding: 1rem 1.5rem;
+    }
+
+    /* Hide other content when collapsed on mobile */
+    .chat-container.collapsed .messages,
+    .chat-container.collapsed .input-area {
+        display: none;
+    }
+
+    .chat-header h1 {
+        flex-grow: 1; /* Allow title to take up space */
+    }
+}
+
+/* Adjustments for even smaller screens if needed */
+@media (max-width: 480px) {
+    .chat-header h1 {
+        font-size: 1.3rem; /* Slightly smaller font for very small screens */
+    }
+
+    .input-area {
+        padding: 0.75rem 1rem;
+        gap: 0.5rem;
+    }
+
+    #userInput {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+    }
+
+    .send-button {
+        width: 40px;
+        height: 40px;
+    }
+    .send-button svg {
+        width: 20px;
+        height: 20px;
+    }
+}
