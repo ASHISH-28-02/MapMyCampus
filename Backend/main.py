@@ -1,13 +1,3 @@
-# main.py
-# To run this backend server:
-# 1. Install required packages:
-#    pip install "fastapi[all]" uvicorn python-dotenv google-generativeai
-# 2. Create a file named .env in the same directory as this file.
-# 3. In the .env file, add your Gemini API key like this:
-#    GEMINI_API_KEY="YOUR_GEMINI_API_KEY_HERE"
-# 4. Run the server from your terminal:
-#    uvicorn main:app --reload
-
 import os
 import re
 from fastapi import FastAPI, HTTPException
@@ -34,10 +24,9 @@ app = FastAPI(
 )
 
 # --- CORS (Cross-Origin Resource Sharing) ---
-# This allows the frontend (running on a different address) to communicate with this backend.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, you should restrict this to your frontend's domain
+    allow_origins=["*"],  # In production, restrict this to your frontend's domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -115,26 +104,23 @@ BUILDINGS = {
     "Thiruvananthapuram International Airport": {"lat": 8.487130936935603, "lng": 76.92196659504725, "description": "The primary airport serving the city of Thiruvananthapuram.", "aliases": ["airport", "tvm airport"]},
 }
 
-# --- Pydantic Models (for data validation) ---
+# --- Pydantic Models ---
 class QueryRequest(BaseModel):
     query: str
 
 # --- Helper Functions ---
 def find_mentioned_buildings(query: str):
-    """Parses a query to find mentioned building keys."""
     lower_query = query.lower()
     found_buildings = set()
     for name, data in BUILDINGS.items():
         all_names = [name.lower()] + [alias.lower() for alias in data.get("aliases", [])]
         for term in all_names:
-            # Use regex for whole word matching
             if re.search(r'\b' + re.escape(term) + r'\b', lower_query):
                 found_buildings.add(name)
                 break
     return list(found_buildings)
 
 async def get_enriched_description(building_name: str) -> str:
-    """Gets an engaging description from the Gemini API."""
     default_description = BUILDINGS.get(building_name, {}).get("description", "No description available.")
     prompt = f"""
     Provide a short, engaging description for the "{building_name}" at the IISER Thiruvananthapuram campus.
@@ -146,23 +132,23 @@ async def get_enriched_description(building_name: str) -> str:
         return response.text
     except Exception as e:
         print(f"Gemini API error: {e}")
-        # Fallback to the default description on error
         return default_description
 
-# --- API Endpoint ---
+# --- API Endpoints ---
+@app.get("/api/config")
+def get_config():
+    """Provides the Google Maps API key to the frontend."""
+    return {"Maps_api_key": os.getenv("Maps_API_KEY")}
+
 @app.post("/api/query")
 async def handle_query(request: QueryRequest):
-    """
-    The main endpoint to process user queries.
-    Determines if the user is asking for a location or a route and returns structured data.
-    """
+    """Processes user queries for locations or routes."""
     query = request.query
     mentioned_keys = find_mentioned_buildings(query)
     
-    # --- Case 1: Route Query ---
     is_route_query = ' to ' in query.lower() or ' from ' in query.lower()
+    
     if len(mentioned_keys) >= 2 and is_route_query:
-        # Simple assumption: first mentioned is 'from', second is 'to'
         from_key = mentioned_keys[0]
         to_key = mentioned_keys[1]
         return {
@@ -171,7 +157,6 @@ async def handle_query(request: QueryRequest):
             "to": {"name": to_key, **BUILDINGS[to_key]},
         }
 
-    # --- Case 2: Single Location Query ---
     if len(mentioned_keys) == 1:
         name = mentioned_keys[0]
         loc_data = BUILDINGS[name]
@@ -184,13 +169,12 @@ async def handle_query(request: QueryRequest):
             "description": enriched_description,
         }
         
-    # --- Case 3: Not Understood ---
     return {
         "type": "error",
         "message": "🤖 Please ask for a single location ('where is the library?') or a route ('hostel to academic block')."
     }
 
-# --- Root Endpoint (for testing) ---
 @app.get("/")
 def read_root():
+    """Root endpoint for testing server status."""
     return {"message": "Welcome to the Campus Navigator API. Use the /api/query endpoint to interact."}
