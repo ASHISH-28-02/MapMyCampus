@@ -7,6 +7,9 @@ async function loadGoogleMaps() {
         const response = await fetch(`${BACKEND_URL}/api/config`);
         const config = await response.json();
         const apiKey = config.Maps_api_key;
+        if (!apiKey) {
+            throw new Error("Maps API key not found in server configuration.");
+        }
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
         script.async = true;
@@ -40,6 +43,7 @@ function initMap() {
     const chatContainer = document.getElementById('chat-container');
     collapseBtn.addEventListener('click', () => {
         chatContainer.classList.toggle('collapsed');
+        // Give the browser time to reflow before resizing the map
         setTimeout(() => {
             google.maps.event.trigger(map, 'resize');
             map.setCenter(IISER_TVM_CENTER);
@@ -95,12 +99,14 @@ function addMessage(sender, text, messageId = null) {
     if (messageId) messageWrapper.id = messageId;
     const isUser = sender === "User";
     messageWrapper.className = isUser ? 'message-wrapper user' : 'message-wrapper bot';
+    // Use innerHTML to allow for HTML content like the thinking bubble
     messageWrapper.innerHTML = `
         <p class="message-sender">${sender}</p>
         <div class="message-bubble ${isUser ? 'user' : 'bot'}">
             <p class="message-text">${text}</p>
         </div>`;
     messagesContainer.appendChild(messageWrapper);
+    // Ensure the chat view scrolls to the latest message
     messagesContainer.parentElement.scrollTop = messagesContainer.parentElement.scrollHeight;
 }
 
@@ -135,6 +141,7 @@ async function handleQuery(msg) {
             clearMap();
         }
 
+        // --- FIX: Handle all response types from the backend ---
         switch (data.type) {
             case 'location':
                 showLocationMarker(data);
@@ -144,14 +151,14 @@ async function handleQuery(msg) {
                 showRoute(data.from, data.to);
                 updateMessage(thinkingMsgId, `🗺️ Showing walking route from ${data.from.name} to ${data.to.name}.`);
                 break;
-            // *** NEW: Handle conversational messages from the bot ***
-            case 'message':
-                updateMessage(thinkingMsgId, data.message);
-                break;
-            case 'error':
+            case 'greeting': // Handle greeting messages
+            case 'answer':   // Handle general answers
+            case 'error':    // Handle errors reported by the backend
                 updateMessage(thinkingMsgId, data.message);
                 break;
             default:
+                // This case handles any unexpected response types from the backend
+                console.error("Unknown response type from backend:", data.type);
                 throw new Error("Unknown response type from backend.");
         }
     } catch (error) {

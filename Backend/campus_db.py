@@ -68,8 +68,9 @@ BUILDINGS = {
     "SBI ATM": {"lat": 8.681793, "lng": 77.134173, "description": "An ATM for State Bank of India.", "aliases": ["sbi atm"]},
     "Resting Place beside Football Ground": {"lat": 8.686052107228857, "lng": 77.13032322749693, "description": "A resting place near the football ground.", "aliases": ["resting place"]},
     "Thirudhara Waterfall": {"lat": 8.68346078009775, "lng": 77.13596573014598, "description": "A beautiful natural waterfall located within the campus grounds.", "aliases": ["waterfall"]},
-    "Thiruvananthapuram Central Railway Station": {"lat": 8.486848364860853, "lng": 76.95214645256466, "description": "The main railway station connecting Thiruvananthapuram to the rest of the country.", "aliases": ["railway station", "central station", "train station"]},
-    "Thiruvananthapuram International Airport": {"lat": 8.487130936935603, "lng": 76.92196659504725, "description": "The primary airport serving the city of Thiruvananthapuram.", "aliases": ["airport", "tvm airport"]},
+    "Library": {"lat": 8.681920078489515, "lng": 77.13392437090883, "description": "The Central Library at IISER Thiruvananthapuram is a fully automated, Wi-Fi-enabled academic resource center open from 9AM to 10PM on weekdays and 9AM to 5:30PM on weekends and holidays, offering extensive print and digital collections to support research and learning.", "aliases": ["iiser central library", "central library"]},
+    "Thiruvananthapuram Central Railway Station": {"lat": 8.486848364860853, "lng": 76.95214645256466, "description": "The main railway station connecting Thiruvananthapuram to the rest of the country and is about 50km away.", "aliases": ["railway station", "central station", "train station"]},
+    "Thiruvananthapuram International Airport": {"lat": 8.487130936935603, "lng": 76.92196659504725, "description": "The primary airport serving the city of Thiruvananthapuram and is about 60km away with a taxi ride there costing around Rs.1800/-.", "aliases": ["airport", "tvm airport"]},
 }
 
 # Connect to the SQLite database (this will create the file if it doesn't exist)
