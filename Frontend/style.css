@@ -86,10 +86,7 @@ body {
     cursor: pointer;
     transition: all 0.3s ease-in-out;
     position: absolute;
-    /* --- MODIFICATION START --- */
-    /* Position the button inside the chat-container on the right */
-    right: 10px; /* Or adjust as needed for desired padding from the right edge */
-    /* --- MODIFICATION END --- */
+    right: 10px;
     top: 20px;
     z-index: 10;
 }
@@ -98,12 +95,12 @@ body {
 
 /* Desktop collapse state - arrow points right (180deg from original left) */
 .chat-container.collapsed #collapse-btn {
-    right: auto; /* Remove the 'right' property from the open state */
-    left: 10px; /* Position to the left of the collapsed chat container, as before */
-    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Keep the shadow when collapsed */
+    right: auto;
+    left: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 .chat-container.collapsed #collapse-btn svg {
-    transform: rotate(180deg); /* Arrow points right when chat is collapsed on desktop */
+    transform: rotate(180deg);
 }
 
 
@@ -183,6 +180,33 @@ body {
 .send-button:hover { background-color: #004D40; }
 .send-button svg { width: 24px; height: 24px; }
 
+
+/* --- NEW 3D BUTTON STYLES --- */
+#threed-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px; /* Match send button height */
+    padding: 0 1.5rem; /* Horizontal padding for a pill shape */
+    background-color: #607D8B; /* A neutral, secondary color (Blue Grey) */
+    color: white;
+    border-radius: 9999px; /* Pill shape */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none; /* Remove underline from 'a' tag */
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    flex-shrink: 0; /* Prevent the button from shrinking */
+}
+
+#threed-btn:hover {
+    background-color: #455A64; /* A darker shade for hover */
+}
+/* --- END OF NEW STYLES --- */
+
+
 .thinking-bubble::after { content: '...'; display: inline-block; animation: thinking 1.5s infinite; }
 @keyframes thinking { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } 100% { content: '.'; } }
 
@@ -210,74 +234,65 @@ body {
         order: 2; /* Ensure map is always at the bottom (after chat) */
     }
 
-    /* Adjust collapse button for mobile view - make it desktop-like */
     #collapse-btn {
-        right: 10px; /* Position relative to the chat-container */
-        top: 10px; /* Adjust top position */
-        /* Revert to desktop styles */
+        right: 10px;
+        top: 10px;
         border-radius: 50%;
         width: 32px;
         height: 32px;
         background: var(--chat-panel-bg);
         border: 1px solid var(--border-color);
-        padding: 0; /* Remove mobile padding */
-        color: unset; /* Remove mobile color */
+        padding: 0;
+        color: unset;
     }
 
     #collapse-btn svg {
-        color: var(--text-secondary); /* Revert SVG color */
-        /* For the mobile view, we want the arrow to point DOWN when open,
-           and UP when collapsed. Original SVG points left.
-        */
-        transform: rotate(270deg); /* Arrow points down when chat is open on mobile */
+        color: var(--text-secondary);
+        transform: rotate(270deg); /* Arrow points down */
     }
 
-    /* Styles when chat is collapsed on mobile */
     .chat-container.collapsed {
-        height: 50px; /* Show only the header/collapse button area */
-        width: 100%; /* Still full width */
+        height: 50px;
+        width: 100%;
         min-height: unset;
         padding: 0;
         border-right: none;
-        border-bottom: 1px solid var(--border-color); /* Maintain bottom border */
-        overflow: hidden; /* Hide content */
+        border-bottom: 1px solid var(--border-color);
+        overflow: hidden;
     }
 
     .chat-container.collapsed #collapse-btn {
-        right: 10px; /* Keep button on the right */
-        left: auto; /* Remove left positioning */
-        top: 10px; /* Adjust top positioning for collapsed state */
-        box-shadow: none; /* Remove shadow */
+        right: 10px;
+        left: auto;
+        top: 10px;
+        box-shadow: none;
     }
 
     .chat-container.collapsed #collapse-btn svg {
-        transform: rotate(90deg); /* Arrow points up when chat is collapsed on mobile */
+        transform: rotate(90deg); /* Arrow points up */
     }
 
-    /* Ensure header remains visible when collapsed on mobile */
     .chat-container.collapsed .chat-header {
         visibility: visible;
-        display: flex; /* Ensure it's still flex to center content */
+        display: flex;
         align-items: center;
-        justify-content: space-between; /* Space out title and collapse button if both visible */
+        justify-content: space-between;
         padding: 1rem 1.5rem;
     }
 
-    /* Hide other content when collapsed on mobile */
     .chat-container.collapsed .messages,
     .chat-container.collapsed .input-area {
         display: none;
     }
 
     .chat-header h1 {
-        flex-grow: 1; /* Allow title to take up space */
+        flex-grow: 1;
     }
 }
 
-/* Adjustments for even smaller screens if needed */
 @media (max-width: 480px) {
     .chat-header h1 {
-        font-size: 1.3rem; /* Slightly smaller font for very small screens */
+        font-size: 1.3rem;
     }
 
     .input-area {
@@ -297,5 +312,12 @@ body {
     .send-button svg {
         width: 20px;
         height: 20px;
+    }
+
+    /* Adjust 3D button for smaller screens */
+    #threed-btn {
+        height: 40px;
+        padding: 0 1rem;
+        font-size: 0.9rem;
     }
 }
