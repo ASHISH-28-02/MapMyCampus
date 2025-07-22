@@ -117,7 +117,12 @@ body {
 .messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
 
 /* Individual Messages & Input Area */
-.message-wrapper { display: flex; flex-direction: column; max-width: 90%; }
+.message-wrapper { 
+    display: flex; 
+    flex-direction: column; 
+    max-width: 90%; 
+    position: relative;
+}
 .message-wrapper.user { align-self: flex-end; align-items: flex-end; }
 .message-wrapper.bot { align-self: flex-start; align-items: flex-start; }
 
@@ -140,17 +145,49 @@ body {
 
 .message-text { font-size: 1rem; font-weight: 400; color: var(--text-primary); margin: 0; }
 
+/* --- NEW: Controls for TTS --- */
+.message-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    margin-left: 4px;
+}
+.speaker-btn, .stop-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    transition: opacity 0.2s, color 0.2s;
+}
+.speaker-btn:hover, .stop-btn:hover {
+    opacity: 1;
+    color: var(--primary-color);
+}
+.speaker-btn svg, .stop-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* --- FIX: Input area layout --- */
 .input-area { 
     padding: 1rem 1.5rem; 
     background-color: var(--chat-panel-bg); 
     border-top: 1px solid var(--border-color); 
     display: flex; 
     align-items: center; 
-    gap: 0.75rem; 
+    gap: 0.5rem; /* Reduced gap to save space */
     flex-shrink: 0; 
 }
 #userInput { 
     flex-grow: 1; 
+    flex-shrink: 1; /* Allow input to shrink */
+    min-width: 50px; /* Prevent input from becoming too small */
     padding: 0.75rem 1rem; 
     border: 1px solid var(--border-color); 
     border-radius: 9999px; 
@@ -163,48 +200,59 @@ body {
     border-color: var(--primary-color); 
 }
 
-.send-button { 
+/* --- BUTTON STYLES (Send, Mic, 3D) --- */
+.send-button, #mic-btn, #threed-btn { 
+    flex-shrink: 0; /* Prevent buttons from shrinking */
     width: 48px; 
     height: 48px; 
-    background-color: var(--primary-color); 
     color: white; 
     border-radius: 50%; 
     border: none; 
     cursor: pointer; 
-    transition: background-color 0.3s; 
+    transition: background-color 0.3s, box-shadow 0.3s; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    flex-shrink: 0; 
+}
+
+.send-button {
+    background-color: var(--primary-color); 
 }
 .send-button:hover { background-color: #004D40; }
 .send-button svg { width: 24px; height: 24px; }
 
+#mic-btn {
+    background-color: #8D6E63; /* A brown color for the mic */
+}
+#mic-btn:hover {
+    background-color: #6D4C41;
+}
+/* Style for when the microphone is actively listening */
+#mic-btn.listening {
+    background-color: #D32F2F; /* Red to indicate recording */
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7);
+}
 
-/* --- NEW 3D BUTTON STYLES --- */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(211, 47, 47, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+}
+
+/* --- FIX: 3D Button Style --- */
 #threed-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 48px; /* Match send button height */
-    padding: 0 1.5rem; /* Horizontal padding for a pill shape */
     background-color: #607D8B; /* A neutral, secondary color (Blue Grey) */
-    color: white;
-    border-radius: 9999px; /* Pill shape */
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    text-decoration: none; /* Remove underline from 'a' tag */
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
     font-size: 1rem;
-    flex-shrink: 0; /* Prevent the button from shrinking */
+    text-decoration: none;
 }
 
 #threed-btn:hover {
     background-color: #455A64; /* A darker shade for hover */
 }
-/* --- END OF NEW STYLES --- */
+/* --- END OF BUTTON STYLES --- */
 
 
 .thinking-bubble::after { content: '...'; display: inline-block; animation: thinking 1.5s infinite; }
@@ -305,7 +353,7 @@ body {
         font-size: 0.9rem;
     }
 
-    .send-button {
+    .send-button, #mic-btn, #threed-btn {
         width: 40px;
         height: 40px;
     }
@@ -314,10 +362,8 @@ body {
         height: 20px;
     }
 
-    /* Adjust 3D button for smaller screens */
     #threed-btn {
-        height: 40px;
-        padding: 0 1rem;
+        padding: 0; /* Remove padding for smaller icon-like button */
         font-size: 0.9rem;
     }
 }

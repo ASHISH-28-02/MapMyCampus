@@ -23,7 +23,7 @@ DATABASE_FILE = "campus.db"
 app = FastAPI(
     title="Campus Navigator API",
     description="Backend service for the IISER TVM Campus Navigator application.",
-    version="1.5.0" # Version bump for the fix!
+    version="1.9.0" # Version bump for JSON-based intent classification
 )
 
 # --- CORS ---
@@ -56,7 +56,6 @@ def find_mentioned_buildings_from_db(query: str):
     """Finds building names mentioned in the query by checking against aliases."""
     conn = get_db_connection()
     try:
-        # Gracefully handle if location tables don't exist
         if not check_table_exists(conn, "buildings") or not check_table_exists(conn, "aliases"):
             print("Warning: 'buildings' or 'aliases' table not found. Location search will be skipped.")
             return []
@@ -105,60 +104,13 @@ def find_relevant_knowledge(query_embedding, conn, top_k=3):
     similarities.sort(key=lambda x: x[0], reverse=True)
     return [content for sim, content in similarities[:top_k]]
 
-# --- API Endpoints ---
-@app.get("/api/config")
-def get_config():
-    """Returns public configuration like API keys for the frontend."""
-    return {"Maps_api_key": os.getenv("Maps_API_KEY")}
-
-@app.post("/api/query")
-async def handle_query(request: QueryRequest):
-    """Processes user queries with a multi-step approach: greeting, location, then RAG."""
-    query = request.query.strip()
-    lower_query = query.lower()
-
-    # 1. Handle Greetings & Simple Chat (No DB access needed)
-    GREETINGS = {"hello", "hi", "hey", "hai"}
-    THANKS = {"thanks", "thank you", "ty"}
-    if lower_query in GREETINGS:
-        return {"type": "greeting", "message": "Hello! How can I help you with IISER TVM today?"}
-    if lower_query in THANKS:
-        return {"type": "greeting", "message": "You're welcome!"}
-
-    # 2. Handle Location/Route Logic
-    mentioned_keys = find_mentioned_buildings_from_db(query)
-    is_route_query = ' to ' in lower_query or ' from ' in lower_query
-
-    if len(mentioned_keys) > 0:
-        conn = get_db_connection()
-        try:
-            if len(mentioned_keys) >= 2 and is_route_query:
-                from_cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[0],))
-                from_data = dict(from_cursor.fetchone())
-                to_cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[1],))
-                to_data = dict(to_cursor.fetchone())
-                return {"type": "route", "from": from_data, "to": to_data}
-
-            if len(mentioned_keys) == 1:
-                cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[0],))
-                loc_data_row = cursor.fetchone()
-                if loc_data_row:
-                    loc_data = dict(loc_data_row)
-                    enriched_description = await get_enriched_description(loc_data['name'], loc_data['description'])
-                    response_data = loc_data
-                    response_data['description'] = enriched_description
-                    return {"type": "location", **response_data}
-        finally:
-            if conn:
-                conn.close()
-
-    # 3. Fallback to Knowledge Base (RAG)
-    print("No specific location found. Falling back to knowledge base search.")
+async def search_knowledge_base(query: str):
+    """Performs a RAG search against the knowledge base."""
+    print(f"Handling as informational query. Searching knowledge base for: '{query}'")
     conn = None
     try:
         conn = get_db_connection()
         
-        # --- FIX: Check if the knowledge base table exists before querying ---
         if not check_table_exists(conn, "knowledge_base"):
             print("Error: knowledge_base table not found in the database.")
             return {
@@ -189,7 +141,7 @@ Context:
 {context_str}
 ---
 
-Question: {request.query}
+Question: {query}
 
 Direct Answer:"""
 
@@ -202,6 +154,100 @@ Direct Answer:"""
     finally:
         if conn:
             conn.close()
+
+# --- API Endpoints ---
+@app.get("/api/config")
+def get_config():
+    """Returns public configuration like API keys for the frontend."""
+    return {"Maps_api_key": os.getenv("Maps_API_KEY")}
+
+@app.post("/api/query")
+async def handle_query(request: QueryRequest):
+    """
+    Processes user queries using an LLM-based intent classification approach.
+    1. Handle simple greetings.
+    2. Use an LLM to classify the query's intent via structured JSON output.
+    3. Route to the appropriate handler (location search or RAG).
+    """
+    query = request.query.strip()
+    lower_query = query.lower()
+
+    # Step 1: Handle simple greetings to save API calls
+    GREETINGS = {"hello", "hi", "hey", "hai"}
+    THANKS = {"thanks", "thank you", "ty"}
+    if lower_query in GREETINGS:
+        return {"type": "greeting", "message": "Hello! How can I help you with IISER TVM today?"}
+    if lower_query in THANKS:
+        return {"type": "greeting", "message": "You're welcome!"}
+
+    # Step 2: Use LLM to classify the query's primary intent using JSON
+    intent = "information_request"  # Default to informational
+    prompt = f"""Analyze the user's query and classify its primary intent. The possible intents are "location_search" or "information_request". Respond with only a JSON object containing the intent, like {{"intent": "your_classification"}}.
+
+Examples:
+- Query: "where is the library"
+  {{"intent": "location_search"}}
+- Query: "lhc"
+  {{"intent": "location_search"}}
+- Query: "route from psb to bsb"
+  {{"intent": "location_search"}}
+- Query: "who is the director"
+  {{"intent": "information_request"}}
+- Query: "what are the mess timings"
+  {{"intent": "information_request"}}
+- Query: "director of iiser"
+  {{"intent": "information_request"}}
+
+Query: "{query}"
+"""
+    try:
+        response = await model.generate_content_async(prompt)
+        # Clean the response to extract only the JSON part
+        json_str = response.text.strip().replace("```json", "").replace("```", "").strip()
+        intent_data = json.loads(json_str)
+        intent = intent_data.get("intent", "information_request")
+        print(f"Intent Check for '{query}'. Classified as: {intent}")
+    except Exception as e:
+        print(f"Error during intent classification: {e}. Defaulting to informational search.")
+        intent = "information_request"
+
+
+    # Step 3: Route based on the classification
+    if intent == "location_search":
+        print("Handling as a location query.")
+        mentioned_keys = find_mentioned_buildings_from_db(query)
+        is_route_query = ' to ' in lower_query or ' from ' in lower_query
+
+        if len(mentioned_keys) > 0:
+            conn = get_db_connection()
+            try:
+                if len(mentioned_keys) >= 2 and is_route_query:
+                    from_cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[0],))
+                    from_data = dict(from_cursor.fetchone())
+                    to_cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[1],))
+                    to_data = dict(to_cursor.fetchone())
+                    if from_data and to_data:
+                        return {"type": "route", "from": from_data, "to": to_data}
+
+                if len(mentioned_keys) == 1:
+                    cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[0],))
+                    loc_data_row = cursor.fetchone()
+                    if loc_data_row:
+                        loc_data = dict(loc_data_row)
+                        enriched_description = await get_enriched_description(loc_data['name'], loc_data['description'])
+                        response_data = loc_data
+                        response_data['description'] = enriched_description
+                        return {"type": "location", **response_data}
+            finally:
+                if conn:
+                    conn.close()
+        
+        # If the intent was 'location' but we couldn't find a specific place, fall through to RAG.
+        print("Location search did not yield a specific result. Falling back to knowledge base.")
+
+    # Step 4: This is the default path for "information_request" and failed location searches.
+    return await search_knowledge_base(query)
+
 
 @app.get("/")
 def read_root():

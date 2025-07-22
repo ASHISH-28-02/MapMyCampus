@@ -15,7 +15,6 @@ BUILDINGS = {
     "Animal House Block": {"lat": 8.681480148391024, "lng": 77.13805260950807, "description": "The Animal House Block.", "aliases": ["animal house"]},
     "ICREEE Greenhouse": {"lat": 8.680936082942651, "lng": 77.13767030114062, "description": "The ICREEE Greenhouse.", "aliases": ["icreee", "greenhouse"]},
     "Iiser Substation 2": {"lat": 8.680497633084729, "lng": 77.13693882392143, "description": "Electrical Substation 2.", "aliases": ["substation 2"]},
-    "Indian Institute of Science Education and Research Thiruvananthapuram": {"lat": 8.682478687790594, "lng": 77.13540620504202, "description": "The main campus of IISER Thiruvananthapuram, a premier institute for science education and research.", "aliases": ["iiser", "iiser tvm", "main campus"]},
     "Volleyball Court": {"lat": 8.681776252451229, "lng": 77.13498589592842, "description": "The campus volleyball court.", "aliases": ["volleyball"]},
     "Visitors’ Forest Retreat": {"lat": 8.682448845793244, "lng": 77.13310263238871, "description": "A retreat area for visitors.", "aliases": ["forest retreat"]},
     "statue of knowledge": {"lat": 8.682226281394632, "lng": 77.13353924861062, "description": "The 'Arivinte Shila' statue of knowledge.", "aliases": ["arivinte shila", "knowledge statue"]},

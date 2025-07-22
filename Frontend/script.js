@@ -1,6 +1,7 @@
 // --- Configuration & Initialization ---
 const BACKEND_URL = "https://mapmycampus.onrender.com";
-const IISER_TVM_CENTER = { lat: 8.682478, lng: 77.135406 };
+// FIX: Restored original campus coordinates for the default view
+const DEFAULT_MAP_CENTER = { lat: 8.682478, lng: 77.135406 }; 
 
 async function loadGoogleMaps() {
     try {
@@ -25,11 +26,109 @@ loadGoogleMaps();
 // --- Global Variables ---
 let map, directionsService, directionsRenderer;
 let activeMarkers = [];
+const micBtn = document.getElementById('mic-btn');
+const userInput = document.getElementById("userInput");
+const messagesContainer = document.getElementById("messages-container");
+
+
+// ===================================================================================
+// === 1. SPEECH TO TEXT & TEXT TO SPEECH (ON-DEMAND) ================================
+// ===================================================================================
+
+// --- Text to Speech (On-Demand) ---
+function speakText(text) {
+    const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
+    const cleanText = text.replace(emojiRegex, '').replace(/<br>/g, '. ').replace(/<[^>]*>/g, '');
+
+    if (!('speechSynthesis' in window)) {
+        console.warn("Speech Synthesis is not supported by this browser.");
+        return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    
+    const speakMainUtterance = () => {
+        const voices = speechSynthesis.getVoices();
+        if (voices.length === 0) {
+            speechSynthesis.onvoiceschanged = () => {
+                speechSynthesis.onvoiceschanged = null; 
+                speechSynthesis.speak(utterance);
+            };
+        } else {
+            speechSynthesis.speak(utterance);
+        }
+    };
+
+    speechSynthesis.cancel();
+    
+    setTimeout(() => {
+        speakMainUtterance();
+    }, 100); 
+}
+
+// --- Event Listener for Speaker and Stop Buttons ---
+messagesContainer.addEventListener('click', function(event) {
+    const speakerBtn = event.target.closest('.speaker-btn');
+    const stopBtn = event.target.closest('.stop-btn');
+
+    if (speakerBtn) {
+        const messageWrapper = speakerBtn.closest('.message-wrapper');
+        const textToSpeak = messageWrapper.querySelector('.message-text').innerText;
+        speakText(textToSpeak);
+    }
+    
+    if (stopBtn) {
+        if ('speechSynthesis' in window) {
+            speechSynthesis.cancel();
+        }
+    }
+});
+
+
+// --- Speech to Text (Voice Input) ---
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition;
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        userInput.value = transcript;
+        micBtn.classList.remove('listening');
+        sendMessage(); // Automatically send after successful transcription
+    };
+
+    recognition.onend = () => {
+        micBtn.classList.remove('listening');
+    };
+
+    recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        micBtn.classList.remove('listening');
+    };
+
+    micBtn.addEventListener('click', () => {
+        if (!recognition) return;
+        speechSynthesis.cancel(); 
+        micBtn.classList.add('listening');
+        recognition.start();
+    });
+
+} else {
+    console.warn("Speech Recognition is not supported by this browser.");
+    if(micBtn) micBtn.style.display = 'none';
+}
+
 
 // --- Map Initialization ---
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 16, center: IISER_TVM_CENTER, mapTypeId: 'hybrid',
+        zoom: 16, // Adjusted zoom for a campus view
+        center: DEFAULT_MAP_CENTER, 
+        mapTypeId: 'hybrid',
         disableDefaultUI: true, zoomControl: true, mapTypeControl: false,
         streetViewControl: false, fullscreenControl: true,
     });
@@ -41,15 +140,18 @@ function initMap() {
     directionsRenderer.setMap(map);
     const collapseBtn = document.getElementById('collapse-btn');
     const chatContainer = document.getElementById('chat-container');
+    
     collapseBtn.addEventListener('click', () => {
         chatContainer.classList.toggle('collapsed');
-        // Give the browser time to reflow before resizing the map
         setTimeout(() => {
             google.maps.event.trigger(map, 'resize');
-            map.setCenter(IISER_TVM_CENTER);
-        }, 300);
+            // Re-center on the default location when panel is toggled for a consistent experience
+            map.setCenter(DEFAULT_MAP_CENTER); 
+        }, 300); 
     });
-    addMessage("Bot", 'Welcome! Ask for a location (e.g., "where is lhc?") or a route ("psb to bsb").');
+
+    const welcomeText = 'Welcome! Ask for a location or a route on campus.';
+    addMessage("Bot", welcomeText);
 }
 
 // --- Map & Chat Functions ---
@@ -66,10 +168,12 @@ function showRoute(origin, destination) {
         travelMode: google.maps.TravelMode.WALKING
     };
     directionsService.route(request, (result, status) => {
-        if (status === "OK") directionsRenderer.setDirections(result);
-        else {
+        if (status === "OK") {
+            directionsRenderer.setDirections(result);
+        } else {
             console.error("Directions request failed due to " + status);
-            addMessage("Bot", "😥 Could not calculate the route. Please try again.");
+            const errorText = "😥 Could not calculate the route. Please try again.";
+            addMessage("Bot", errorText);
         }
     });
 }
@@ -85,28 +189,43 @@ function showLocationMarker(loc) {
 }
 
 function sendMessage() {
-    const input = document.getElementById("userInput");
-    const msg = input.value.trim();
+    const msg = userInput.value.trim();
     if (!msg) return;
     addMessage("User", msg);
-    input.value = "";
+    userInput.value = "";
+    speechSynthesis.cancel();
     handleQuery(msg);
 }
 
 function addMessage(sender, text, messageId = null) {
-    const messagesContainer = document.getElementById("messages-container");
     const messageWrapper = document.createElement("div");
     if (messageId) messageWrapper.id = messageId;
     const isUser = sender === "User";
     messageWrapper.className = isUser ? 'message-wrapper user' : 'message-wrapper bot';
-    // Use innerHTML to allow for HTML content like the thinking bubble
+    
+    const controlsHTML = isUser ? '' : `
+        <div class="message-controls">
+            <button class="speaker-btn" title="Read out loud">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+                </svg>
+            </button>
+            <button class="stop-btn" title="Stop reading">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 6h12v12H6z"></path>
+                </svg>
+            </button>
+        </div>
+    `;
+
     messageWrapper.innerHTML = `
         <p class="message-sender">${sender}</p>
         <div class="message-bubble ${isUser ? 'user' : 'bot'}">
             <p class="message-text">${text}</p>
-        </div>`;
+        </div>
+        ${controlsHTML}
+    `;
     messagesContainer.appendChild(messageWrapper);
-    // Ensure the chat view scrolls to the latest message
     messagesContainer.parentElement.scrollTop = messagesContainer.parentElement.scrollHeight;
 }
 
@@ -117,6 +236,22 @@ function updateMessage(messageId, newHtml) {
         if (textElement) {
             textElement.innerHTML = newHtml;
             textElement.classList.remove('thinking-bubble');
+        }
+        if (!messageElement.querySelector('.message-controls')) {
+            const controlsHTML = `
+                <div class="message-controls">
+                    <button class="speaker-btn" title="Read out loud">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+                        </svg>
+                    </button>
+                    <button class="stop-btn" title="Stop reading">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6 6h12v12H6z"></path>
+                        </svg>
+                    </button>
+                </div>`;
+            messageElement.insertAdjacentHTML('beforeend', controlsHTML);
         }
     }
 }
@@ -136,33 +271,37 @@ async function handleQuery(msg) {
 
         const data = await response.json();
         
-        // The thinking bubble is always present, so clear the map only for map-related actions
         if (data.type === 'location' || data.type === 'route') {
             clearMap();
         }
 
-        // --- FIX: Handle all response types from the backend ---
+        let botReplyText = ""; 
+
         switch (data.type) {
             case 'location':
                 showLocationMarker(data);
-                updateMessage(thinkingMsgId, `📍 ${data.name} is marked on the map. <br><br> ${data.description}`);
+                botReplyText = `📍 ${data.name} is marked on the map. ${data.description}`;
+                updateMessage(thinkingMsgId, botReplyText.replace(/\. /g, '. <br><br>'));
                 break;
             case 'route':
                 showRoute(data.from, data.to);
-                updateMessage(thinkingMsgId, `🗺️ Showing walking route from ${data.from.name} to ${data.to.name}.`);
+                botReplyText = `🗺️ Showing walking route from ${data.from.name} to ${data.to.name}.`;
+                updateMessage(thinkingMsgId, botReplyText);
                 break;
-            case 'greeting': // Handle greeting messages
-            case 'answer':   // Handle general answers
-            case 'error':    // Handle errors reported by the backend
-                updateMessage(thinkingMsgId, data.message);
+            case 'greeting':
+            case 'answer':
+            case 'error':
+                botReplyText = data.message;
+                updateMessage(thinkingMsgId, botReplyText);
                 break;
             default:
-                // This case handles any unexpected response types from the backend
                 console.error("Unknown response type from backend:", data.type);
                 throw new Error("Unknown response type from backend.");
         }
+
     } catch (error) {
         console.error("Failed to handle query:", error);
-        updateMessage(thinkingMsgId, "😥 Sorry, something went wrong. I couldn't connect to my brain. Please try again later.");
+        const errorText = "😥 Sorry, something went wrong. I couldn't connect to my brain. Please try again later.";
+        updateMessage(thinkingMsgId, errorText);
     }
 }
