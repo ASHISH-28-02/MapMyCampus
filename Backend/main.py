@@ -173,7 +173,7 @@ async def handle_query(request: QueryRequest):
     lower_query = query.lower()
 
     # Step 1: Handle simple greetings to save API calls
-    GREETINGS = {"hello", "hi", "hey", "hai"}
+    GREETINGS = {"hello", "hi", "hey", "hai", "hello."}
     THANKS = {"thanks", "thank you", "ty"}
     if lower_query in GREETINGS:
         return {"type": "greeting", "message": "Hello! How can I help you with IISER TVM today?"}

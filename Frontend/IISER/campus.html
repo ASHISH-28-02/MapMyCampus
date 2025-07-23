@@ -9,257 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     
+    <link rel="stylesheet" href="style.css">
+    
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-
-    <style>
-        /* --- COMBINED CSS FOR CHATBOT AND 3D VIEW --- */
-        :root {
-            --primary-color: #00796B;
-            --primary-light: #E0F2F1;
-            --background-color: #F5F7FA;
-            --chat-panel-bg: #FFFFFF;
-            --user-bubble-bg: #E3F2FD;
-            --bot-bubble-bg: #E8F5E9;
-            --text-primary: #212121;
-            --text-secondary: #757575;
-            --border-color: #E0E0E0;
-        }
-        html { box-sizing: border-box; }
-        *, *:before, *:after { box-sizing: inherit; }
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--background-color);
-            display: flex;
-            flex-direction: row;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .chat-container {
-            width: 35%;
-            max-width: 450px;
-            min-width: 320px;
-            height: 100vh;
-            background-color: var(--chat-panel-bg);
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 25px rgba(0,0,0,0.05);
-            border-right: 1px solid var(--border-color);
-            position: relative;
-            transition: min-width 0.3s ease-in-out, width 0.3s ease-in-out, padding 0.3s ease-in-out;
-            z-index: 10;
-        }
-        
-        /* The <model-viewer> will use this ID to fit the layout */
-        #map {
-            flex-grow: 1;
-            height: 100vh;
-            transition: width 0.3s ease-in-out;
-        }
-
-        .chat-container.collapsed {
-            width: 0;
-            min-width: 0;
-            padding: 0;
-            border-right: none;
-        }
-        .chat-container.collapsed > * { visibility: hidden; }
-        .chat-container.collapsed #collapse-btn { visibility: visible; }
-        .chat-header {
-            padding: 1rem 1.5rem;
-            background-color: var(--chat-panel-bg);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-shrink: 0;
-        }
-        .chat-header h1 {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-        #collapse-btn {
-            background: var(--chat-panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-            position: absolute;
-            right: 10px;
-            top: 20px;
-            z-index: 10;
-        }
-        #collapse-btn:hover { background-color: #f1f1f1; transform: scale(1.1); }
-        #collapse-btn svg { width: 20px; height: 20px; color: var(--text-secondary); transition: transform 0.3s ease-in-out; }
-        .chat-container.collapsed #collapse-btn {
-            right: auto;
-            left: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .chat-container.collapsed #collapse-btn svg {
-            transform: rotate(180deg);
-        }
-        .messages {
-            flex: 1;
-            padding: 1.5rem;
-            overflow-y: auto;
-            background-color: var(--background-color);
-        }
-        #messages-container { display: flex; flex-direction: column; gap: 1.25rem; }
-        .message-wrapper { 
-            display: flex; 
-            flex-direction: column; 
-            max-width: 90%; 
-            position: relative;
-        }
-        .message-wrapper.user { align-self: flex-end; align-items: flex-end; }
-        .message-wrapper.bot { align-self: flex-start; align-items: flex-start; }
-        .message-sender {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin: 0 0 0.25rem 0;
-            padding: 0 0.5rem;
-        }
-        .message-bubble { 
-            line-height: 1.5; 
-            padding: 0.75rem 1rem; 
-            border-radius: 1rem;
-            width: fit-content;
-        }
-        .message-bubble.bot { background-color: var(--bot-bubble-bg); border-top-left-radius: 0; }
-        .message-bubble.user { background-color: var(--user-bubble-bg); border-top-right-radius: 0; }
-        .message-text { font-size: 1rem; font-weight: 400; color: var(--text-primary); margin: 0; }
-        .message-controls {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 4px;
-            margin-left: 4px;
-        }
-        .speaker-btn, .stop-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            opacity: 0.6;
-            transition: opacity 0.2s, color 0.2s;
-        }
-        .speaker-btn:hover, .stop-btn:hover {
-            opacity: 1;
-            color: var(--primary-color);
-        }
-        .speaker-btn svg, .stop-btn svg {
-            width: 16px;
-            height: 16px;
-        }
-        .input-area { 
-            padding: 1rem 1.5rem; 
-            background-color: var(--chat-panel-bg); 
-            border-top: 1px solid var(--border-color); 
-            display: flex; 
-            align-items: center; 
-            gap: 0.5rem;
-            flex-shrink: 0; 
-        }
-        #userInput { 
-            flex-grow: 1; 
-            flex-shrink: 1;
-            min-width: 50px;
-            padding: 0.75rem 1rem; 
-            border: 1px solid var(--border-color); 
-            border-radius: 9999px; 
-            transition: box-shadow 0.2s; 
-            font-size: 1rem; 
-        }
-        #userInput:focus { 
-            outline: none; 
-            box-shadow: 0 0 0 3px var(--primary-light); 
-            border-color: var(--primary-color); 
-        }
-        .send-button, #mic-btn, #gmaps-btn { 
-            flex-shrink: 0;
-            width: 48px; 
-            height: 48px; 
-            color: white; 
-            border-radius: 50%; 
-            border: none; 
-            cursor: pointer; 
-            transition: background-color 0.3s, box-shadow 0.3s; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        .send-button {
-            background-color: var(--primary-color); 
-        }
-        .send-button:hover { background-color: #004D40; }
-        .send-button svg { width: 24px; height: 24px; }
-        #mic-btn {
-            background-color: #8D6E63;
-        }
-        #mic-btn:hover {
-            background-color: #6D4C41;
-        }
-        #mic-btn.listening {
-            background-color: #D32F2F;
-            animation: pulse 1.5s infinite;
-            box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7);
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(211, 47, 47, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
-        }
-        #gmaps-btn {
-            background-color: #fff;
-            border: 1px solid var(--border-color);
-            color: #EA4335; /* Google Red */
-            text-decoration: none;
-        }
-        #gmaps-btn:hover {
-            background-color: #f1f1f1;
-        }
-        .thinking-bubble::after { content: '...'; display: inline-block; animation: thinking 1.5s infinite; }
-        @keyframes thinking { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } 100% { content: '.'; } }
-        
-        /* --- 3D Model Hotspot Styles --- */
-         .hotspot {
-      display: block;
-      position: relative;
-      width: 5px;
-      height: 5px;
-      border-radius: 3px;
-      border: none;
-      background-color: #00796B;
-    }
-
-    /* This forces the annotation text box to be visible */
-    .hotspot-annotation {
-      position: absolute;
-      background-color: #ffffff;
-      border: 1px solid #000000;
-      color: #000000;
-      padding: 4px 8px;
-      font-size: 10px;
-      width: max-content;
-      transform: translateY(-120%); /* Move it above the red dot */
-    }
-
-    </style>
 </head>
 <body>
 
@@ -270,7 +22,9 @@
             </svg>
         </button>
         <div class="chat-header">
-            <h1>MapMyCampus</h1>
+            <div class="title-container">
+                <h1 class="main-title">MapMyCampus</h1>
+            </div>
         </div>
         <div class="messages">
             <div id="messages-container">
@@ -312,261 +66,90 @@
         max-camera-orbit="auto"
         min-field-of-view="5deg">
 
-        <button class="hotspot" slot="hotspot-1" data-position="78.99m 116.16m 460.25m" data-normal="-0.48m 0m 0.87m">
+        <button class="hotspot" slot="hotspot-1" data-position="78.99m 116.16m 460.25m" data-normal="-0.48m 0m 0.87m" data-name="IISER TVM Second gate" data-aliases="second gate,gate 2">
             <div class="hotspot-annotation">IISER TVM Second gate</div>
         </button>
-        <button class="hotspot" slot="hotspot-2" data-position="193.14m 128.21m 526.31m" data-normal="0.80m 0m 0.59m">
+        <button class="hotspot" slot="hotspot-2" data-position="193.14m 128.21m 526.31m" data-normal="0.80m 0m 0.59m" data-name="Indoor Sports Complex" data-aliases="indoor stadium,sports complex">
             <div class="hotspot-annotation">Indoor Sports Complex</div>
         </button>
-        <button class="hotspot" slot="hotspot-3" data-position="318.45m 137.27m 549.39m" data-normal="0.01m 0.99m -0.08m">
+        <button class="hotspot" slot="hotspot-3" data-position="318.45m 137.27m 549.39m" data-normal="0.01m 0.99m -0.08m" data-name="Anamudi Block" data-aliases="anamudi">
             <div class="hotspot-annotation">Anamudi Block</div>
         </button>
-        <button class="hotspot" slot="hotspot-4" data-position="312.38m 129.25m 382.30m" data-normal="-0.42m 0m 0.90m">
+        <button class="hotspot" slot="hotspot-4" data-position="312.38m 129.25m 382.30m" data-normal="-0.42m 0m 0.90m" data-name="PhD Hostel Block 5" data-aliases="phd hostel 5,block 5">
             <div class="hotspot-annotation">PhD Hostel Block 5</div>
         </button>
-        <button class="hotspot" slot="hotspot-5" data-position="327.43m 142.19m 348.86m" data-normal="-0.22m 0.94m 0.24m">
+        <button class="hotspot" slot="hotspot-5" data-position="327.43m 142.19m 348.86m" data-normal="-0.22m 0.94m 0.24m" data-name="PhD Hostel Block 4" data-aliases="phd hostel 4,block 4">
             <div class="hotspot-annotation">PhD Hostel Block 4</div>
         </button>
-        <button class="hotspot" slot="hotspot-6" data-position="249.41m 134.82m 298.40m" data-normal="-0.18m 0.95m 0.23m">
+        <button class="hotspot" slot="hotspot-6" data-position="249.41m 134.82m 298.40m" data-normal="-0.18m 0.95m 0.23m" data-name="PhD Hostel Block 3" data-aliases="phd hostel 3,block 3">
             <div class="hotspot-annotation">PhD Hostel Block 3</div>
         </button>
-        <button class="hotspot" slot="hotspot-7" data-position="235.95m 119.93m 332.48m" data-normal="-0.36m 0m 0.93m">
+        <button class="hotspot" slot="hotspot-7" data-position="235.95m 119.93m 332.48m" data-normal="-0.36m 0m 0.93m" data-name="PhD Hostel Block 6" data-aliases="phd hostel 6,block 6">
             <div class="hotspot-annotation">PhD Hostel Block 6</div>
         </button>
-        <button class="hotspot" slot="hotspot-8" data-position="359.33m 149.36m 329.97m" data-normal="-0.20m 0.96m 0.13m">
+        <button class="hotspot" slot="hotspot-8" data-position="359.33m 149.36m 329.97m" data-normal="-0.20m 0.96m 0.13m" data-name="Agasthya" data-aliases="agasthya hostel">
             <div class="hotspot-annotation">Agasthya</div>
         </button>
-        <button class="hotspot" slot="hotspot-9" data-position="280.47m 146.58m 271.49m" data-normal="-0.15m 0.95m 0.23m">
+        <button class="hotspot" slot="hotspot-9" data-position="280.47m 146.58m 271.49m" data-normal="-0.15m 0.95m 0.23m" data-name="Ponmudi" data-aliases="ponmudi hostel">
             <div class="hotspot-annotation">Ponmudi</div>
         </button>
-        <button class="hotspot" slot="hotspot-10" data-position="347.53m 154.65m 276.91m" data-normal="-0.10m 0.97m 0.18m">
+        <button class="hotspot" slot="hotspot-10" data-position="347.53m 154.65m 276.91m" data-normal="-0.10m 0.97m 0.18m" data-name="Central Dining Hall" data-aliases="cdh,mess hall,canteen">
             <div class="hotspot-annotation">Central Dining Hall</div>
         </button>
-        <button class="hotspot" slot="hotspot-11" data-position="406.22m 158.24m 293.27m" data-normal="-0.08m 0.98m 0.17m">
+        <button class="hotspot" slot="hotspot-11" data-position="406.22m 158.24m 293.27m" data-normal="-0.08m 0.98m 0.17m" data-name="IISER Substation 2" data-aliases="substation 2">
             <div class="hotspot-annotation">IISER Substation 2</div>
         </button>
-        <button class="hotspot" slot="hotspot-12" data-position="500.53m 196.21m 208.16m" data-normal="-0.12m 0.98m 0.09m">
+        <button class="hotspot" slot="hotspot-12" data-position="500.53m 196.21m 208.16m" data-normal="-0.12m 0.98m 0.09m" data-name="Animal House" data-aliases="animal facility">
             <div class="hotspot-annotation">Animal House</div>
         </button>
-        <button class="hotspot" slot="hotspot-13" data-position="417.93m 190.55m 152.58m" data-normal="-0.12m 0.98m -0.08m">
+        <button class="hotspot" slot="hotspot-13" data-position="417.93m 190.55m 152.58m" data-normal="-0.12m 0.98m -0.08m" data-name="Dept. of Biological Sciences" data-aliases="biology department,bio block">
             <div class="hotspot-annotation">Dept. of Biological Sciences</div>
         </button>
-        <button class="hotspot" slot="hotspot-14" data-position="320.62m 172.92m 101.76m" data-normal="-0.08m 0.99m -0.01m">
+        <button class="hotspot" slot="hotspot-14" data-position="320.62m 172.92m 101.76m" data-normal="-0.08m 0.99m -0.01m" data-name="Dept. of Chemical Sciences" data-aliases="chemistry department,chem block">
             <div class="hotspot-annotation">Dept. of Chemical Sciences</div>
         </button>
-        <button class="hotspot" slot="hotspot-15" data-position="258.20m 159.48m 97.95m" data-normal="-0.95m 0m -0.30m">
+        <button class="hotspot" slot="hotspot-15" data-position="258.20m 159.48m 97.95m" data-normal="-0.95m 0m -0.30m" data-name="MOBEL Lab" data-aliases="mobel">
             <div class="hotspot-annotation">MOBEL Lab</div>
         </button>
-        <button class="hotspot" slot="hotspot-16" data-position="196.87m 166.10m 59.70m" data-normal="0.01m 0.99m -0.01m">
+        <button class="hotspot" slot="hotspot-16" data-position="196.87m 166.10m 59.70m" data-normal="0.01m 0.99m -0.01m" data-name="Dept. of Physical Sciences" data-aliases="physics department,physics block">
             <div class="hotspot-annotation">Dept. of Physical Sciences</div>
         </button>
-        <button class="hotspot" slot="hotspot-17" data-position="176.71m 166.55m -43.85m" data-normal="-0.08m 0.98m 0.14m">
+        <button class="hotspot" slot="hotspot-17" data-position="176.71m 166.55m -43.85m" data-normal="-0.08m 0.98m 0.14m" data-name="Lecture Hall Complex" data-aliases="lhc">
             <div class="hotspot-annotation">Lecture Hall Complex</div>
         </button>
-        <button class="hotspot" slot="hotspot-18" data-position="-62.55m 147.33m -109.67m" data-normal="-0.04m 0.99m -0.08m">
+        <button class="hotspot" slot="hotspot-18" data-position="-62.55m 147.33m -109.67m" data-normal="-0.04m 0.99m -0.08m" data-name="Shopping Complex" data-aliases="shopcom,shops">
             <div class="hotspot-annotation">Shopping Complex</div>
         </button>
-        <button class="hotspot" slot="hotspot-19" data-position="-92.75m 138.40m -42.56m" data-normal="-0.46m 0m 0.88m">
+        <button class="hotspot" slot="hotspot-19" data-position="-92.75m 138.40m -42.56m" data-normal="-0.46m 0m 0.88m" data-name="Health Centre" data-aliases="clinic,hospital">
             <div class="hotspot-annotation">Health Centre</div>
         </button>
-        <button class="hotspot" slot="hotspot-20" data-position="-31.60m 136.84m 86.18m" data-normal="-0.24m 0.96m 0.05m">
+        <button class="hotspot" slot="hotspot-20" data-position="-31.60m 136.84m 86.18m" data-normal="-0.24m 0.96m 0.05m" data-name="Visitors Forest Retreat" data-aliases="guest house,forest retreat">
             <div class="hotspot-annotation">Visitors Forest Retreat</div>
         </button>
-        <button class="hotspot" slot="hotspot-21" data-position="70.30m 146.46m 143.39m" data-normal="-0.21m 0.96m 0.16m">
+        <button class="hotspot" slot="hotspot-21" data-position="70.30m 146.46m 143.39m" data-normal="-0.21m 0.96m 0.16m" data-name="Central Library" data-aliases="library">
             <div class="hotspot-annotation">Central Library</div>
         </button>
-        <button class="hotspot" slot="hotspot-22" data-position="117.65m 134.44m 217.22m" data-normal="-0.01m 0.95m 0.29m">
+        <button class="hotspot" slot="hotspot-22" data-position="117.65m 134.44m 217.22m" data-normal="-0.01m 0.95m 0.29m" data-name="Tasty Restaurant" data-aliases="tasty">
             <div class="hotspot-annotation">Tasty Restaurant</div>
         </button>
-        <button class="hotspot" slot="hotspot-23" data-position="-711.03m 121.53m -306.61m" data-normal="0.36m 0m 0.93m">
+        <button class="hotspot" slot="hotspot-23" data-position="-711.03m 121.53m -306.61m" data-normal="0.36m 0m 0.93m" data-name="Residence Block" data-aliases="apartments,faculty housing">
             <div class="hotspot-annotation">Residence Block</div>
         </button>
-        <button class="hotspot" slot="hotspot-24" data-position="-559.21m 168.22m -363.05m" data-normal="0.85m 0m 0.51m">
+        <button class="hotspot" slot="hotspot-24" data-position="-559.21m 168.22m -363.05m" data-normal="0.85m 0m 0.51m" data-name="Director's Bungalow" data-aliases="director house">
             <div class="hotspot-annotation">Director's Bungalow</div>
         </button>
-        <button class="hotspot" slot="hotspot-25" data-position="-649.36m 151.16m -414.41m" data-normal="0.92m 0m 0.37m">
+        <button class="hotspot" slot="hotspot-25" data-position="-649.36m 151.16m -414.41m" data-normal="0.92m 0m 0.37m" data-name="IISER Substation 3" data-aliases="substation 3">
             <div class="hotspot-annotation">IISER Substation 3</div>
         </button>
+        
+        <div id="marker" class="marker">
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/>
+            </svg>
+        </div>
+
     </model-viewer>
 
-    <script>
-        // --- CHATBOT JAVASCRIPT ---
-        const BACKEND_URL = "https://mapmycampus.onrender.com";
-        const micBtn = document.getElementById('mic-btn');
-        const userInput = document.getElementById("userInput");
-        const messagesContainer = document.getElementById("messages-container");
-
-        function speakText(text) {
-            const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
-            const cleanText = text.replace(emojiRegex, '').replace(/<br>/g, '. ').replace(/<[^>]*>/g, '');
-            if (!('speechSynthesis' in window)) { return; }
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            const speakMainUtterance = () => {
-                const voices = speechSynthesis.getVoices();
-                if (voices.length === 0) {
-                    speechSynthesis.onvoiceschanged = () => {
-                        speechSynthesis.onvoiceschanged = null; 
-                        speechSynthesis.speak(utterance);
-                    };
-                } else {
-                    speechSynthesis.speak(utterance);
-                }
-            };
-            speechSynthesis.cancel();
-            setTimeout(speakMainUtterance, 100); 
-        }
-
-        messagesContainer.addEventListener('click', function(event) {
-            const speakerBtn = event.target.closest('.speaker-btn');
-            const stopBtn = event.target.closest('.stop-btn');
-            if (speakerBtn) {
-                const textToSpeak = speakerBtn.closest('.message-wrapper').querySelector('.message-text').innerText;
-                speakText(textToSpeak);
-            }
-            if (stopBtn) {
-                if ('speechSynthesis' in window) {
-                    speechSynthesis.cancel();
-                }
-            }
-        });
-
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition;
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.lang = 'en-US';
-            recognition.onresult = (event) => {
-                userInput.value = event.results[0][0].transcript;
-                micBtn.classList.remove('listening');
-                sendMessage();
-            };
-            recognition.onend = () => micBtn.classList.remove('listening');
-            recognition.onerror = (event) => {
-                console.error("Speech recognition error:", event.error);
-                micBtn.classList.remove('listening');
-            };
-            micBtn.addEventListener('click', () => {
-                if (!recognition) return;
-                speechSynthesis.cancel(); 
-                micBtn.classList.add('listening');
-                recognition.start();
-            });
-        } else {
-            if(micBtn) micBtn.style.display = 'none';
-        }
-
-        const collapseBtn = document.getElementById('collapse-btn');
-        const chatContainer = document.getElementById('chat-container');
-        collapseBtn.addEventListener('click', () => {
-            chatContainer.classList.toggle('collapsed');
-        });
-        
-        window.onload = () => {
-             const welcomeText = 'Welcome to the 3D View! Ask me anything about the campus.';
-             addMessage("Bot", welcomeText);
-        };
-
-        function sendMessage() {
-            const msg = userInput.value.trim();
-            if (!msg) return;
-            addMessage("User", msg);
-            userInput.value = "";
-            speechSynthesis.cancel();
-            handleQuery(msg);
-        }
-
-        function addMessage(sender, text, messageId = null) {
-            const messageWrapper = document.createElement("div");
-            if (messageId) messageWrapper.id = messageId;
-            const isUser = sender === "User";
-            messageWrapper.className = isUser ? 'message-wrapper user' : 'message-wrapper bot';
-            const controlsHTML = isUser ? '' : `
-                <div class="message-controls">
-                    <button class="speaker-btn" title="Read out loud">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
-                    </button>
-                    <button class="stop-btn" title="Stop reading">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"></path></svg>
-                    </button>
-                </div>`;
-            messageWrapper.innerHTML = `
-                <p class="message-sender">${sender}</p>
-                <div class="message-bubble ${isUser ? 'user' : 'bot'}"><p class="message-text">${text}</p></div>
-                ${controlsHTML}`;
-            messagesContainer.appendChild(messageWrapper);
-            messagesContainer.parentElement.scrollTop = messagesContainer.parentElement.scrollHeight;
-        }
-
-        function updateMessage(messageId, newHtml) {
-            const messageElement = document.getElementById(messageId);
-            if (!messageElement) return;
-            const textElement = messageElement.querySelector('.message-text');
-            if (textElement) {
-                textElement.innerHTML = newHtml;
-                textElement.classList.remove('thinking-bubble');
-            }
-            if (!messageElement.querySelector('.message-controls')) {
-                const controlsHTML = `
-                    <div class="message-controls">
-                        <button class="speaker-btn" title="Read out loud"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg></button>
-                        <button class="stop-btn" title="Stop reading"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"></path></svg></button>
-                    </div>`;
-                messageElement.insertAdjacentHTML('beforeend', controlsHTML);
-            }
-        }
-
-        async function handleQuery(msg) {
-            const thinkingMsgId = `bot-msg-${Date.now()}`;
-            addMessage("Bot", "<span class='thinking-bubble'>Thinking</span>", thinkingMsgId);
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/query`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: msg })
-                });
-                if (!response.ok) throw new Error(`Backend error: ${response.statusText}`);
-                const data = await response.json();
-                
-                let botReplyText = "";
-                switch (data.type) {
-                    case 'location':
-                        botReplyText = `📍 ${data.name} is marked on the map. ${data.description}`;
-                        updateMessage(thinkingMsgId, botReplyText.replace(/\. /g, '. <br><br>'));
-                        break;
-                    case 'route':
-                        botReplyText = `🗺️ To get from ${data.from.name} to ${data.to.name}, you would follow the route shown on the 2D map.`;
-                        updateMessage(thinkingMsgId, botReplyText);
-                        break;
-                    case 'greeting':
-                    case 'answer':
-                    case 'error':
-                        botReplyText = data.message;
-                        updateMessage(thinkingMsgId, botReplyText);
-                        break;
-                    default:
-                        throw new Error("Unknown response type from backend.");
-                }
-            } catch (error) {
-                console.error("Failed to handle query:", error);
-                const errorText = "😥 Sorry, something went wrong. I couldn't connect to my brain. Please try again later.";
-                updateMessage(thinkingMsgId, errorText);
-            }
-        }
-    </script>
-    <script>
-        // --- HOTSPOT JAVASCRIPT ---
-        const modelViewer = document.querySelector('#map');
-        const hotspots = modelViewer.querySelectorAll('.hotspot');
-
-        modelViewer.addEventListener('load', () => {
-            hotspots.forEach((hotspot) => {
-                hotspot.addEventListener('mouseover', () => hotspot.querySelector('.hotspot-annotation').style.visibility = 'visible');
-                hotspot.addEventListener('mouseout', () => hotspot.querySelector('.hotspot-annotation').style.visibility = 'hidden');
-                hotspot.addEventListener('focus', () => hotspot.querySelector('.hotspot-annotation').style.visibility = 'visible');
-                hotspot.addEventListener('blur', () => hotspot.querySelector('.hotspot-annotation').style.visibility = 'hidden');
-            });
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
-</ht
+</html>
