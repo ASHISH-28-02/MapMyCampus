@@ -8,9 +8,11 @@ Welcome to **MapMyCampus**! This is an interactive, AI-powered companion tool de
 
 Experience MapMyCampus live right now! Click the preview below to open the application.
 
-<a href="https://map-my-campus-gamma.vercel.app/" target="_blank">
-  <img src="image.png" alt="MapMyCampus Live Demo Preview" width="600" style="border: 2px solid #00796B; border-radius: 8px;">
-</a>
+<div align="center">
+  <a href="https://map-my-campus-gamma.vercel.app/" target="_blank">
+    <img src="image.png" alt="MapMyCampus Live Demo Preview" width="600" style="border: 2px solid #00796B; border-radius: 8px;">
+  </a>
+</div>
 
 ---
 
@@ -75,14 +77,6 @@ Are you a developer interested in how MapMyCampus works or want to set it up loc
 
 ---
 
-## Contributors
-
-Thanks to these wonderful people who have contributed to the project. 
-<a href="https://github.com/ASHISH-28-02/MapMyCampus/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=ASHISH-28-02/MapMyCampus" />
-</a>
-
----
 
 ## License
 
