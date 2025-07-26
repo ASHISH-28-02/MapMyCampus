@@ -6,7 +6,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 // --- CHATBOT & UI SCRIPT ---
-const BACKEND_URL = "http://127.0.0.1:8000";
+const BACKEND_URL = "https://mapmycampus.onrender.com";
 const micBtn = document.getElementById('mic-btn');
 const sendBtn = document.getElementById('send-btn');
 const userInput = document.getElementById("userInput");
