@@ -1,6 +1,10 @@
-# MapMyCampus 🗺️✨
-
-Welcome to **MapMyCampus**! This is an interactive, AI-powered companion tool designed to help you explore, find your way around campus with ease and also help you learn more about your Campus. Whether you prefer a classic 2D map or an immersive 3D experience, our smart assistant is here to guide you.
+<h1>
+<div style="display: flex; align-items: center;">
+<img src="Frontend/assets/Logo.png" width="50" alt="MapMyCampus Logo" style="margin-right: 15px;">
+<span>MapMyCampus</span>
+</div>
+</h1>
+Welcome to MapMyCampus! This is an interactive, AI-powered companion tool designed to help you explore, find your way around campus with ease and also help you learn more about your Campus. Whether you prefer a classic 2D map or an immersive 3D experience, our smart assistant is here to guide you🗺️✨
 
 ---
 
