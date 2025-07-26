@@ -13,7 +13,20 @@ It's built with FastAPI and uses Google's Gemini Pro for natural language unders
 - **Dynamic Content Generation**: Enriches location descriptions using the generative model.
 
 ---
+### 🗂️ Backend Project Structure
 
+```
+Backend/
+├── Data/
+│   └── IISER.txt             # Raw campus data file (e.g., building info)
+├── campus_db.py              # Database schema and connection logic
+├── campus.db                 # SQLite database file (auto-generated)
+├── ingest_data.py            # Script to parse and insert data into campus.db
+├── main.py                   # FastAPI backend entry point
+├── README.md                 # Backend documentation
+└── requirements.txt          # Python dependencies
+```
+---
 ## Setup and Installation
 
 Follow these steps to get the backend server running locally.
