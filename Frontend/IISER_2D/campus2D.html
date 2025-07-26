@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>MapMyCampus</title>
-    <link rel="icon" type="image/png" href="/frontend/assets/Logo.png">
+    <link rel="icon" type="image/png" href="/Frontend/assets/Mainlogo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
@@ -13,13 +13,24 @@
 </head>
 <body>
     <div class="chat-container" id="chat-container">
+        <!-- Theme Toggle Button -->
+        <button id="theme-toggle-btn" title="Toggle dark mode">
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm9-4h-2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1s-.45-1-1-1zm-2.93 5.93l-1.41 1.41c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.41-1.41c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41zM12 3c.55 0 1-.45 1-1V1c0-.55-.45-1-1-1s-1 .45-1 1v1c0 .55.45 1 1 1zm0 18c.55 0 1-.45 1-1v-1c0-.55-.45-1-1-1s-1 .45-1 1v1c0 .55.45 1 1 1zM4.93 6.34l1.41-1.41c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0L3.51 4.93c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0zm14.14 14.14l-1.41 1.41c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.41-1.41c.39.39 1.02.39 1.41 0 .39.39.39 1.02 0 1.41zM3 12c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1s.45-1 1-1h1c.55 0 1 .45 1 1z"/>
+            </svg>
+            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9.37 5.51C9.19 6.15 9.1 6.82 9.1 7.5c0 4.08 3.32 7.4 7.4 7.4.68 0 1.35-.09 1.99-.27C17.45 17.19 14.93 19 12 19c-3.86 0-7-3.14-7-7 0-2.93 1.81-5.45 4.37-6.49zM12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.64-.11 2.4-.32.06-.02.12-.05.18-.08.06-.03.12-.07.18-.11.53-.36.94-.84 1.2-1.4.26-.56.34-1.18.24-1.79-.1-.61-.4-1.17-.83-1.63-.44-.46-1.01-.8-1.63-1.03-.62-.23-1.28-.27-1.93-.11-.65.16-1.26.51-1.73 1.01-.47.5-.8 1.11-.96 1.77-.16.66-.12 1.34.11 1.98.23.64.65 1.18 1.2 1.56.55.38 1.2.58 1.87.58.79 0 1.55-.26 2.17-.75.62-.49 1.08-1.16 1.34-1.9.02-.05.03-.1.05-.15.01-.06.03-.12.04-.18.02-.05.03-.1.04-.16.14-.35.22-.72.22-1.1 0-1.04-.49-1.97-1.23-2.71C15.97 4.49 14.04 3 12 3z"/>
+            </svg>
+        </button>
         <button id="collapse-btn" title="Toggle chat panel">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
         </button>
         <div class="chat-header">
-            <h1>MapMyCampus</h1>
+            <a href="../index.html" style="text-decoration: none; color: inherit;">
+                <h1>MapMyCampus</h1>
+            </a>
         </div>
         <div class="messages">
             <div id="messages-container">
