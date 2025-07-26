@@ -1,4 +1,4 @@
-# MapMyCampus Backend
+# MapMyCampus Backend 🗺️
 
 It's built with FastAPI and uses Google's Gemini Pro for natural language understanding, intent classification, and Retrieval-Augmented Generation (RAG) to answer user queries.
 
