@@ -8,7 +8,8 @@ This document provides a complete technical guide to the frontend of the MapMyCa
 
 - **HTML5 / CSS3 / JavaScript (ES6+)** – Core structure, styling, and interactivity  
 - **Google Maps JavaScript API** – Powers dynamic 2D mapping with markers, routes, and controls  
-- **Google `<model-viewer>`** – Renders 3D campus models with smooth zoom and orbit controls  
+- **Google `<model-viewer>`** – Renders 3D campus models with smooth zoom and orbit controls
+- **Three.js** - This is the main JavaScript library used to create and display the entire 3D experience in the browser
 - **Web Speech API**
   - `SpeechRecognition` – Captures user voice commands (e.g., “Locate Library”)  
   - `SpeechSynthesis` – Converts chatbot text responses into spoken audio for enhanced accessibility
