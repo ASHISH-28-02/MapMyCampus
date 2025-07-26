@@ -269,3 +269,112 @@ body {
     transform: translateY(-100%);
     pointer-events: none;
 }
+/* --- Media Queries for Responsiveness --- */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column; /* Chat on top, map on bottom */
+        overflow-y: auto; /* Allow scrolling on the entire page */
+    }
+
+    .chat-container {
+        width: 100%; /* Full width for chat on mobile */
+        max-width: none; /* Remove max-width constraint */
+        min-width: unset; /* Remove min-width constraint */
+        height: 60vh; /* Chat takes 60% of viewport height */
+        border-right: none; /* No border on the right */
+        border-bottom: 1px solid var(--border-color); /* Add border to bottom */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05); /* Adjust shadow for bottom */
+        order: 1; /* Ensure chat is always at the top (before map) */
+    }
+
+    #map {
+        width: 100%; /* Full width for map on mobile */
+        height: 40vh; /* Map takes 40% of viewport height */
+        order: 2; /* Ensure map is always at the bottom (after chat) */
+    }
+
+    #collapse-btn {
+        right: 10px;
+        top: 10px;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        background: var(--chat-panel-bg);
+        border: 1px solid var(--border-color);
+        padding: 0;
+        color: unset;
+    }
+
+    #collapse-btn svg {
+        color: var(--text-secondary);
+        transform: rotate(270deg); /* Arrow points down */
+    }
+
+    .chat-container.collapsed {
+        height: 50px;
+        width: 100%;
+        min-height: unset;
+        padding: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .chat-container.collapsed #collapse-btn {
+        right: 10px;
+        left: auto;
+        top: 10px;
+        box-shadow: none;
+    }
+
+    .chat-container.collapsed #collapse-btn svg {
+        transform: rotate(90deg); /* Arrow points up */
+    }
+
+    .chat-container.collapsed .chat-header {
+        visibility: visible;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+    }
+
+    .chat-container.collapsed .messages,
+    .chat-container.collapsed .input-area {
+        display: none;
+    }
+
+    .chat-header h1 {
+        flex-grow: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .input-area {
+        padding: 0.75rem 1rem;
+        gap: 0.5rem;
+    }
+
+    #userInput {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+    }
+
+    .send-button, #mic-btn, #threed-btn {
+        width: 40px;
+        height: 40px;
+    }
+    .send-button svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    #threed-btn {
+        padding: 0; /* Remove padding for smaller icon-like button */
+        font-size: 0.9rem;
+    }
+}
