@@ -1,6 +1,6 @@
 <h1>
 <div style="display: flex; align-items: center;">
-<img src="Frontend/assets/Logo.png" width="50" alt="MapMyCampus Logo" style="margin-right: 15px;">
+<img src="Frontend/assets/Mainlogo.png" width="50" alt="MapMyCampus Logo" style="margin-right: 15px;">
 <span>MapMyCampus</span>
 </div>
 </h1>
