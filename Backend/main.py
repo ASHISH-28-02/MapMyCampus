@@ -3,11 +3,12 @@ import sqlite3
 import re
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import google.generativeai as genai
 import json
 import numpy as np
+from typing import Optional
 
 # --- Configuration ---
 load_dotenv()
@@ -24,7 +25,7 @@ DATABASE_FILE = "campus.db"
 app = FastAPI(
     title="Campus Navigator API",
     description="Backend service for the IISER TVM Campus Navigator application.",
-    version="2.4.0" # Version bump for stricter formatting
+    version="2.4.3" # Version bump for robust query logic
 )
 
 # --- CORS ---
@@ -51,6 +52,8 @@ def check_table_exists(conn, table_name):
 # --- Pydantic Models ---
 class QueryRequest(BaseModel):
     query: str
+    is_3d: Optional[bool] = Field(None, alias='is_3d')
+
 
 # --- Helper Functions ---
 def find_mentioned_buildings_from_db(query: str):
@@ -60,12 +63,12 @@ def find_mentioned_buildings_from_db(query: str):
         if not check_table_exists(conn, "buildings") or not check_table_exists(conn, "aliases"):
             print("Warning: 'buildings' or 'aliases' table not found. Location search will be skipped.")
             return []
-        # This now correctly checks if the user's query is a substring of a known alias.
+        
         cursor = conn.execute("""
             SELECT DISTINCT b.name
             FROM buildings b
             JOIN aliases a ON b.id = a.building_id
-            WHERE INSTR(LOWER(REPLACE(a.name, '-', ' ')), LOWER(?)) > 0
+            WHERE INSTR(LOWER(a.name), LOWER(?)) > 0
         """, (query.lower(),))
         buildings = [row['name'] for row in cursor.fetchall()]
         return buildings
@@ -79,7 +82,6 @@ async def get_enriched_description(building_name: str, default_description: str)
     Generates an engaging description for a building by rewriting the factual default
     description, preventing hallucination and cleaning up formatting.
     """
-    # Updated prompt to be extremely specific about avoiding line breaks.
     prompt = f"""You are a helpful campus guide assistant. Your task is to rewrite a factual description to make it more engaging and conversational for a student.
 IMPORTANT:
 - Do not add any new facts or change the core purpose of the building described.
@@ -95,14 +97,12 @@ Rewrite the factual description into a short, engaging, single-paragraph respons
     try:
         response = await model.generate_content_async(prompt)
         
-        # More robust cleaning: first replace all newlines with a space, then collapse multiple spaces.
         text_no_newlines = response.text.replace('\n', ' ')
         clean_text = re.sub(r'\s+', ' ', text_no_newlines).strip()
 
         if clean_text:
             return clean_text
         else:
-            # If the model returns an empty response, fall back to the default
             print(f"Gemini returned an empty description for '{building_name}'. Falling back to default.")
             return default_description
             
@@ -156,8 +156,8 @@ async def search_knowledge_base(query: str):
 
         if not context_chunks:
             return {
-                "type": "error",
-                "message": "🤖 I can't seem to find information on that. I can help with locations on campus or answer questions about academics and life at IISER TVM."
+                "type": "answer",
+                "message": "Sorry, I couldn't find an answer."
             }
 
         context_str = "\n\n".join(context_chunks)
@@ -210,45 +210,49 @@ async def handle_query(request: QueryRequest):
     if lower_query in THANKS:
         return {"type": "greeting", "message": "You're welcome!"}
 
-    # Step 2: ALWAYS search for a location in the database FIRST.
+    # Step 2: Search for a location in the database.
     print(f"Searching for location mentions in query: '{query}'")
     mentioned_keys = find_mentioned_buildings_from_db(query)
     
-    # Step 3: If we found a location, process it.
-    if mentioned_keys:
-        print(f"Found location mentions: {mentioned_keys}. Handling as location query.")
-        is_route_query = ' to ' in lower_query or ' from ' in lower_query
-        conn = get_db_connection()
-        try:
-            # Handle route queries (2 or more locations)
-            if len(mentioned_keys) >= 2 and is_route_query:
-                from_cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[0],))
-                from_data_row = from_cursor.fetchone()
-                to_cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[1],))
-                to_data_row = to_cursor.fetchone()
-                if from_data_row and to_data_row:
-                    return {"type": "route", "from": dict(from_data_row), "to": dict(to_data_row)}
+    # **FIX:** This logic is now restructured to be more robust.
+    # If no location is mentioned, we proceed to the knowledge base.
+    if not mentioned_keys:
+        print("No specific location found in DB. Handling as informational query.")
+        return await search_knowledge_base(query)
 
-            # Handle single location queries
-            if mentioned_keys: # Use the first mentioned key if not a clear route
-                cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[0],))
-                loc_data_row = cursor.fetchone()
-                if loc_data_row:
-                    loc_data = dict(loc_data_row)
-                    enriched_description = await get_enriched_description(loc_data['name'], loc_data['description'])
-                    response_data = loc_data
-                    response_data['description'] = enriched_description
-                    return {"type": "location", **response_data}
-        finally:
-            if conn:
-                conn.close()
+    # If a location IS mentioned, we commit to handling it as a location/route query.
+    print(f"Found location mentions: {mentioned_keys}. Handling as location query.")
+    is_route_query = ' to ' in lower_query or ' from ' in lower_query
+    conn = get_db_connection()
+    try:
+        # Handle route queries (2 or more locations)
+        if len(mentioned_keys) >= 2 and is_route_query:
+            from_cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[0],))
+            from_data_row = from_cursor.fetchone()
+            to_cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[1],))
+            to_data_row = to_cursor.fetchone()
+            if from_data_row and to_data_row:
+                return {"type": "route", "from": dict(from_data_row), "to": dict(to_data_row)}
+            else:
+                # Handle case where route locations are recognized but data isn't found
+                return {"type": "answer", "message": "I recognized the locations for the route, but couldn't find the path. Please try rephrasing."}
 
-    # Step 4: If NO location was found in our DB, fall back to the knowledge base.
-    print("No specific location found in DB. Handling as informational query.")
-    return await search_knowledge_base(query)
-
-
-@app.get("/")
-def read_root():
-    """Root endpoint to confirm the API is running."""
-    return {"message": "Welcome to the Campus Navigator API. Now running with a SQLite database and RAG."}
+        # Handle single location queries
+        cursor = conn.execute("SELECT * FROM buildings WHERE name = ?", (mentioned_keys[0],))
+        loc_data_row = cursor.fetchone()
+        if loc_data_row:
+            loc_data = dict(loc_data_row)
+            enriched_description = await get_enriched_description(loc_data['name'], loc_data['description'])
+            response_data = loc_data
+            response_data['description'] = enriched_description
+            return {"type": "location", **response_data}
+        else:
+            # This handles the case where an alias is found but the building data lookup fails
+            return {"type": "answer", "message": f"I recognized '{mentioned_keys[0]}' in your query, but I couldn't retrieve its specific details."}
+            
+    except Exception as e:
+        print(f"Error during location/route processing: {e}")
+        return {"type": "error", "message": "🤖 I encountered a problem processing the location. Please try again."}
+    finally:
+        if conn:
+            conn.close()

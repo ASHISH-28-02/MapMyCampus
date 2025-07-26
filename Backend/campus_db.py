@@ -1,6 +1,7 @@
 import sqlite3
+import re
 
-# This is your BUILDINGS data, now with standardized quotes.
+# This is your BUILDINGS data.
 BUILDINGS = {
     "I Cafe": {"lat": 8.680665982054032, "lng": 77.13678688931871, "description": "I Cafe is a popular spot for snacks and coffee.", "aliases": ["i-cafe", "i cafe"]},
     "Lecture Hall Complex": {"lat": 8.683558103707359, "lng": 77.13498231455564, "description": "The Lecture Hall Complex (LHC) is where most classes and academic events take place.", "aliases": ["lhc", "lecture halls", "lecture hall"]},
@@ -113,17 +114,32 @@ for name, data in BUILDINGS.items():
         )
         building_id = cursor.lastrowid
         
-        # Insert all aliases for that building
+        # --- **IMPROVEMENT**: Generate a set of all aliases to avoid duplicates ---
+        all_aliases = set()
+        
+        # 1. Add provided aliases (and standardize to lowercase)
         for alias in data.get('aliases', []):
-            cursor.execute(
-                "INSERT INTO aliases (building_id, name) VALUES (?, ?)",
-                (building_id, alias)
-            )
-        # Also add the building's own name as a lowercase alias for easier searching
-        cursor.execute(
-            "INSERT INTO aliases (building_id, name) VALUES (?, ?)",
-            (building_id, name.lower())
-        )
+            all_aliases.add(alias.lower().strip())
+            
+        # 2. Add the building's own name as an alias
+        all_aliases.add(name.lower().strip())
+        
+        # 3. **NEW**: Add a simplified version of the name as an alias
+        # (e.g., "Animal House Block" -> "animal house")
+        simplified_name = re.sub(r'\b(block|centre|complex|building)\b', '', name.lower(), flags=re.IGNORECASE).strip()
+        simplified_name = re.sub(r'\s+', ' ', simplified_name) # Collapse multiple spaces
+        if simplified_name and simplified_name != name.lower().strip():
+            all_aliases.add(simplified_name)
+            
+        # Insert all unique, standardized aliases for that building
+        print(f" -> For '{name}', inserting aliases: {all_aliases}")
+        for alias in all_aliases:
+            if alias: # Ensure alias is not an empty string
+                cursor.execute(
+                    "INSERT INTO aliases (building_id, name) VALUES (?, ?)",
+                    (building_id, alias)
+                )
+
     except sqlite3.IntegrityError as e:
         print(f"Error inserting '{name}': {e}. This might be due to a duplicate name.")
 

@@ -1,5 +1,5 @@
 // --- Configuration & Initialization ---
-        const BACKEND_URL = "https://mapmycampus.onrender.com";
+        const BACKEND_URL = "http://127.0.0.1:8000";
         const DEFAULT_MAP_CENTER = { lat: 8.682478, lng: 77.135406 }; 
 
         async function loadGoogleMaps() {

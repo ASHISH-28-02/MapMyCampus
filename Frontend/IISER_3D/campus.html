@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>MapMyCampus - 3D View</title>
-    <link rel="icon" type="image/png" href="/Frontend/assets/Mainlogo.png">
+    <link rel="icon" type="image/png" href="../assets/Mainlogo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
@@ -65,11 +65,16 @@
             <button class="hotspot" slot="hotspot-23" data-position="-711.03m 121.53m -306.61m" data-normal="0.36m 0m 0.93m" data-name="Residence Block" data-aliases="apartments,faculty housing"><div class="hotspot-annotation">Residence Block</div></button>
             <button class="hotspot" slot="hotspot-24" data-position="-559.21m 168.22m -363.05m" data-normal="0.85m 0m 0.51m" data-name="Director's Bungalow" data-aliases="director house"><div class="hotspot-annotation">Director's Bungalow</div></button>
             <button class="hotspot" slot="hotspot-25" data-position="-649.36m 151.16m -414.41m" data-normal="0.92m 0m 0.37m" data-name="IISER Substation 3" data-aliases="substation 3"><div class="hotspot-annotation">IISER Substation 3</div></button>
-
-            <div id="marker" class="marker"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg></div>
+            
+            <!-- **THE FIX:** The marker is now back in the HTML where it belongs -->
+            <div id="marker" class="marker" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/>
+                </svg>
+            </div>
         </model-viewer>
 
-            <button id="tour-btn">
+        <button id="tour-btn">
             <div class="start-tour-content">
                 <span>START TOUR</span>
             </div>
