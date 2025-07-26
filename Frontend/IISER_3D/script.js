@@ -274,7 +274,7 @@ function initTour() {
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/libs/draco/gltf/');
     const loader = new GLTFLoader();
-    loader.setDRACOLoader(loader);
+    loader.setDRACOLoader(dracoLoader);
     loader.load(modelURL, (gltf) => {
         const campusModel = gltf.scene;
         const box = new THREE.Box3().setFromObject(campusModel);
