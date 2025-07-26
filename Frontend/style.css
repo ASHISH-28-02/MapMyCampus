@@ -51,9 +51,11 @@ h1 {
     font-weight: 700;
     letter-spacing: -3px;
     margin-bottom: 1rem;
-    background: -webkit-linear-gradient(45deg, #eee, #fff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    background: linear-gradient(45deg, #eee, #fff); /* Use standard gradient */
+    -webkit-background-clip: text; /* Prefixed for older browsers */
+    background-clip: text;         /* Standard property for all modern browsers */
+    color: transparent;            /* Fallback for browsers that don't support text clipping */
+
 }
 
 p {
