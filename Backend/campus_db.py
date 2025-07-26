@@ -38,7 +38,7 @@ BUILDINGS = {
     "Tennis Court": {"lat": 8.67829918664407, "lng": 77.13516827604315, "description": "The campus tennis court.", "aliases": ["tennis"]},
     "Anamudi A block": {"lat": 8.6786226797446, "lng": 77.13585451303928, "description": "This faculty residence for boys is under the care of wardens Dr. Tanumoy Mandal (School of Physics) and Dr. Jerry Alfred Fereiro (School of Chemistry).The Anamudi D residence for boys is under the care of wardens Dr. Jerry Alfred Fereiro (School of Chemistry) and Dr. Tanumoy Mandal (School of Physics)", "aliases": ["anamudi block", "anamudi residence", "anamudi faculty housing"]},
     "Futsal court": {"lat": 8.678364704257847, "lng": 77.13596359296996, "description": "The campus futsal court.", "aliases": ["futsal"]},
-    "IISER VITHURAMain gate": {"lat": 8.67793969519614, "lng": 77.13334274182657, "description": "The main entrance gate of the IISER campus.", "aliases": ["main gate", "gate 1"]},
+    "IISER VITHURA Main gate": {"lat": 8.67793969519614, "lng": 77.13334274182657, "description": "The main entrance gate of the IISER campus.", "aliases": ["main gate", "gate 1"]},
     "DG yard": {"lat": 8.681696059695446, "lng": 77.1341959577972, "description": "The DG yard.", "aliases": ["dg yard"]},
     "STP sewage treatment plant": {"lat": 8.679652935248393, "lng": 77.13459441115718, "description": "The Sewage Treatment Plant.", "aliases": ["stp", "sewage plant"]},
     "CPWD office": {"lat": 8.679066159642666, "lng": 77.13390891564076, "description": "The CPWD office.", "aliases": ["cpwd"]},

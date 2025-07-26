@@ -1,5 +1,4 @@
 // --- THREE.JS IMPORTS ---
-// Note: These are ES6 module imports. Your HTML must include <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
@@ -15,7 +14,7 @@ const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const collapseBtn = document.getElementById('collapse-btn');
 const chatContainer = document.getElementById('chat-container');
 const modelViewer = document.querySelector('#map');
-const marker = document.getElementById('marker'); // Get the marker element from the HTML
+const marker = document.getElementById('marker'); 
 
 // --- EVENT LISTENERS ---
 
@@ -60,20 +59,12 @@ function sendMessage() {
     handleQuery(msg); 
 }
 
-/**
- * **FIXED FUNCTION:** Resets the map view by hiding the marker.
- * It NO LONGER hides the original hotspots.
- */
 function resetMapView() {
     if (marker) {
         marker.style.display = 'none';
     }
 }
 
-/**
- * **FIXED FUNCTION:** This function now correctly uses the existing marker from your HTML.
- * @param {object} locationData The location data from the backend.
- */
 function showLocationMarker(locationData) {
     if (!modelViewer || !marker) {
         console.error("Model viewer or marker not found!");
@@ -92,20 +83,17 @@ function showLocationMarker(locationData) {
         const position = targetHotspot.dataset.position;
         const normal = targetHotspot.dataset.normal;
 
-        // **THE FIX:** Instead of creating a new element, we update the existing one.
-        // This ensures your CSS styles are applied and the marker is visible.
-        marker.setAttribute('slot', `marker-slot-${Date.now()}`); // Use a unique slot name to force update
+        marker.setAttribute('slot', `marker-slot-${Date.now()}`);
         marker.setAttribute('data-position', position);
         marker.setAttribute('data-normal', normal);
-        marker.style.display = 'block'; // Make the marker visible
+        marker.style.display = 'block';
 
-        // Animate the camera to focus on the marker
         modelViewer.cameraTarget = position;
         modelViewer.cameraOrbit = "0deg 75deg 250m";
         modelViewer.fieldOfView = '30deg';
     } else {
         console.warn(`Could not find a matching hotspot for location: "${locationData.name}"`);
-        resetMapView(); // If no hotspot is found, just reset the view.
+        resetMapView();
     }
 }
 
@@ -114,7 +102,6 @@ async function handleQuery(query) {
     const messageId = `bot-msg-${Date.now()}`;
     addMessage("Bot", "...", messageId);
     
-    // Reset the view at the start of every query to clear any old markers
     resetMapView();
 
     try {
@@ -189,7 +176,7 @@ modelViewer.addEventListener('load', () => {
     });
 });
 
-// --- CINEMATIC TOUR LOGIC (Your original code is preserved below) ---
+// --- CINEMATIC TOUR LOGIC ---
 const tourBtn = document.getElementById('tour-btn');
 const mapWrapper = document.getElementById('map-wrapper');
 const tourCanvas = document.getElementById('tour-canvas');
@@ -270,11 +257,13 @@ function initTour() {
     const hotspotData = [ { name: "IISER TVM Second gate", pos: "78.99m 116.16m 460.25m" }, { name: "Indoor Sports Complex", pos: "193.14m 128.21m 526.31m" }, { name: "Anamudi Block", pos: "318.45m 137.27m 549.39m" }, { name: "PhD Hostel Block 5", pos: "312.38m 129.25m 382.30m" }, { name: "PhD Hostel Block 4", pos: "327.43m 142.19m 348.86m" }, { name: "PhD Hostel Block 3", pos: "249.41m 134.82m 298.40m" }, { name: "PhD Hostel Block 6", pos: "235.95m 119.93m 332.48m" }, { name: "Agasthya", pos: "359.33m 149.36m 329.97m" }, { name: "Ponmudi", pos: "280.47m 146.58m 271.49m" }, { name: "Central Dining Hall", pos: "347.53m 154.65m 276.91m" }, { name: "IISER Substation 2", pos: "406.22m 158.24m 293.27m" }, { name: "Animal House", pos: "500.53m 196.21m 208.16m" }, { name: "Dept. of Biological Sciences", pos: "417.93m 190.55m 152.58m" }, { name: "Dept. of Chemical Sciences", pos: "320.62m 172.92m 101.76m" }, { name: "MOBEL Lab", pos: "258.20m 159.48m 97.95m" }, { name: "Dept. of Physical Sciences", pos: "196.87m 166.10m 59.70m" }, { name: "Lecture Hall Complex", pos: "176.71m 166.55m -43.85m" }, { name: "Shopping Complex", pos: "-62.55m 147.33m -109.67m" }, { name: "Health Centre", pos: "-92.75m 138.40m -42.56m" }, { name: "Visitors Forest Retreat", pos: "-31.60m 136.84m 86.18m" }, { name: "Central Library", pos: "70.30m 146.46m 143.39m" }, { name: "Tasty Restaurant", pos: "117.65m 134.44m 217.22m" }, { name: "Residence Block", pos: "-711.03m 121.53m -306.61m" }, { name: "Director's Bungalow", pos: "-559.21m 168.22m -363.05m" }, { name: "IISER Substation 3", pos: "-649.36m 151.16m -414.41m" } ];
     const parsePosition = (posString) => { const [x, y, z] = posString.replace(/m/g, '').split(' ').map(Number); return new THREE.Vector3(x, y, z); };
     parsedHotspots = hotspotData.map(data => ({ name: data.name, position: parsePosition(data.pos) }));
-    const modelURL = 'IISER.glb';
+    
+    // **THE FIX:** The model URL is now the full, correct path from your <model-viewer> tag.
+    const modelURL = 'https://raw.githubusercontent.com/ASHISH-28-02/MapMyCampus/main/Frontend/IISER_3D/IISER.glb';
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/libs/draco/gltf/');
     const loader = new GLTFLoader();
-    loader.setDRACOLoader(loader);
+    loader.setDRACOLoader(dracoLoader);
     loader.load(modelURL, (gltf) => {
         const campusModel = gltf.scene;
         const box = new THREE.Box3().setFromObject(campusModel);
@@ -301,7 +290,7 @@ function initTour() {
         animateTour();
     }, undefined, (error) => {
         console.error("Tour model loading error:", error);
-        tourLoader.innerHTML = 'Error: Could not load tour.';
+        tourLoader.innerHTML = 'Error: Could not load tour model. Check the path and ensure you are on a web server.';
         endTour();
     });
 }
