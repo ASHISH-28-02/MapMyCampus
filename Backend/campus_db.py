@@ -1,6 +1,7 @@
 import sqlite3
+import re
 
-# This is your BUILDINGS data, now with standardized quotes.
+# This is your BUILDINGS data.
 BUILDINGS = {
     "I Cafe": {"lat": 8.680665982054032, "lng": 77.13678688931871, "description": "I Cafe is a popular spot for snacks and coffee.", "aliases": ["i-cafe", "i cafe"]},
     "Lecture Hall Complex": {"lat": 8.683558103707359, "lng": 77.13498231455564, "description": "The Lecture Hall Complex (LHC) is where most classes and academic events take place.", "aliases": ["lhc", "lecture halls", "lecture hall"]},
@@ -37,7 +38,7 @@ BUILDINGS = {
     "Tennis Court": {"lat": 8.67829918664407, "lng": 77.13516827604315, "description": "The campus tennis court.", "aliases": ["tennis"]},
     "Anamudi A block": {"lat": 8.6786226797446, "lng": 77.13585451303928, "description": "This faculty residence for boys is under the care of wardens Dr. Tanumoy Mandal (School of Physics) and Dr. Jerry Alfred Fereiro (School of Chemistry).The Anamudi D residence for boys is under the care of wardens Dr. Jerry Alfred Fereiro (School of Chemistry) and Dr. Tanumoy Mandal (School of Physics)", "aliases": ["anamudi block", "anamudi residence", "anamudi faculty housing"]},
     "Futsal court": {"lat": 8.678364704257847, "lng": 77.13596359296996, "description": "The campus futsal court.", "aliases": ["futsal"]},
-    "IISER VITHURAMain gate": {"lat": 8.67793969519614, "lng": 77.13334274182657, "description": "The main entrance gate of the IISER campus.", "aliases": ["main gate", "gate 1"]},
+    "IISER VITHURA Main gate": {"lat": 8.67793969519614, "lng": 77.13334274182657, "description": "The main entrance gate of the IISER campus.", "aliases": ["main gate", "gate 1"]},
     "DG yard": {"lat": 8.681696059695446, "lng": 77.1341959577972, "description": "The DG yard.", "aliases": ["dg yard"]},
     "STP sewage treatment plant": {"lat": 8.679652935248393, "lng": 77.13459441115718, "description": "The Sewage Treatment Plant.", "aliases": ["stp", "sewage plant"]},
     "CPWD office": {"lat": 8.679066159642666, "lng": 77.13390891564076, "description": "The CPWD office.", "aliases": ["cpwd"]},
@@ -113,17 +114,32 @@ for name, data in BUILDINGS.items():
         )
         building_id = cursor.lastrowid
         
-        # Insert all aliases for that building
+        # --- **IMPROVEMENT**: Generate a set of all aliases to avoid duplicates ---
+        all_aliases = set()
+        
+        # 1. Add provided aliases (and standardize to lowercase)
         for alias in data.get('aliases', []):
-            cursor.execute(
-                "INSERT INTO aliases (building_id, name) VALUES (?, ?)",
-                (building_id, alias)
-            )
-        # Also add the building's own name as a lowercase alias for easier searching
-        cursor.execute(
-            "INSERT INTO aliases (building_id, name) VALUES (?, ?)",
-            (building_id, name.lower())
-        )
+            all_aliases.add(alias.lower().strip())
+            
+        # 2. Add the building's own name as an alias
+        all_aliases.add(name.lower().strip())
+        
+        # 3. **NEW**: Add a simplified version of the name as an alias
+        # (e.g., "Animal House Block" -> "animal house")
+        simplified_name = re.sub(r'\b(block|centre|complex|building)\b', '', name.lower(), flags=re.IGNORECASE).strip()
+        simplified_name = re.sub(r'\s+', ' ', simplified_name) # Collapse multiple spaces
+        if simplified_name and simplified_name != name.lower().strip():
+            all_aliases.add(simplified_name)
+            
+        # Insert all unique, standardized aliases for that building
+        print(f" -> For '{name}', inserting aliases: {all_aliases}")
+        for alias in all_aliases:
+            if alias: # Ensure alias is not an empty string
+                cursor.execute(
+                    "INSERT INTO aliases (building_id, name) VALUES (?, ?)",
+                    (building_id, alias)
+                )
+
     except sqlite3.IntegrityError as e:
         print(f"Error inserting '{name}': {e}. This might be due to a duplicate name.")
 

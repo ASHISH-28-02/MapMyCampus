@@ -8,159 +8,84 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
-    
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+        }
+    }
+    </script>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+
 </head>
 <body>
 
     <div class="chat-container" id="chat-container">
-        <!-- NEW: Theme Toggle Button -->
-        <button id="theme-toggle-btn" title="Toggle dark mode">
-            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm9-4h-2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1s-.45-1-1-1zm-2.93 5.93l-1.41 1.41c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.41-1.41c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41zM12 3c.55 0 1-.45 1-1V1c0-.55-.45-1-1-1s-1 .45-1 1v1c0 .55.45 1 1 1zm0 18c.55 0 1-.45 1-1v-1c0-.55-.45-1-1-1s-1 .45-1 1v1c0 .55.45 1 1 1zM4.93 6.34l1.41-1.41c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0L3.51 4.93c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0zm14.14 14.14l-1.41 1.41c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.41-1.41c.39.39 1.02.39 1.41 0 .39.39.39 1.02 0 1.41zM3 12c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1s.45-1 1-1h1c.55 0 1 .45 1 1z"/>
-            </svg>
-            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9.37 5.51C9.19 6.15 9.1 6.82 9.1 7.5c0 4.08 3.32 7.4 7.4 7.4.68 0 1.35-.09 1.99-.27C17.45 17.19 14.93 19 12 19c-3.86 0-7-3.14-7-7 0-2.93 1.81-5.45 4.37-6.49zM12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.64-.11 2.4-.32.06-.02.12-.05.18-.08.06-.03.12-.07.18-.11.53-.36.94-.84 1.2-1.4.26-.56.34-1.18.24-1.79-.1-.61-.4-1.17-.83-1.63-.44-.46-1.01-.8-1.63-1.03-.62-.23-1.28-.27-1.93-.11-.65.16-1.26.51-1.73 1.01-.47.5-.8 1.11-.96 1.77-.16.66-.12 1.34.11 1.98.23.64.65 1.18 1.2 1.56.55.38 1.2.58 1.87.58.79 0 1.55-.26 2.17-.75.62-.49 1.08-1.16 1.34-1.9.02-.05.03-.1.05-.15.01-.06.03-.12.04-.18.02-.05.03-.1.04-.16.14-.35.22-.72.22-1.1 0-1.04-.49-1.97-1.23-2.71C15.97 4.49 14.04 3 12 3z"/>
-            </svg>
-        </button>
-        <button id="collapse-btn" title="Toggle chat panel">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-        </button>
-        <div class="chat-header">
-            <div class="title-container">
-                <a href="../index.html" style="text-decoration: none; color: inherit;">
-                    <h1 class="main-title">MapMyCampus</h1>
-                </a>
-            </div>
-        </div>
-        <div class="messages">
-            <div id="messages-container">
-            </div>
-        </div>
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="Ask a question..." onkeydown="if(event.key === 'Enter') sendMessage()"/>
-            
-            <a href="../IISER_2D/campus2D.html" id="gmaps-btn" title="Go to 2D Map">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5-2.5-1.12-2.5-2.5-2.5z"/></svg>
-            </a>
-
-            <button id="mic-btn" title="Ask with voice">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px">
-                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                    <path d="M17 11h-1c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92z"/>
-                </svg>
-            </button>
-            
-            <button onclick="sendMessage()" class="send-button" title="Send message">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px">
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                </svg>
-            </button>
-        </div>
+        <button id="theme-toggle-btn" title="Toggle dark mode"><svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm9-4h-2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1s-.45-1-1-1zm-2.93 5.93l-1.41 1.41c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.41-1.41c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41zM12 3c.55 0 1-.45 1-1V1c0-.55-.45-1-1-1s-1 .45-1 1v1c0 .55.45 1 1 1zm0 18c.55 0 1-.45 1-1v-1c0-.55-.45-1-1-1s-1 .45-1 1v1c0 .55.45 1 1 1zM4.93 6.34l1.41-1.41c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0L3.51 4.93c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0zm14.14 14.14l-1.41 1.41c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.41-1.41c.39.39 1.02.39 1.41 0 .39.39.39 1.02 0 1.41zM3 12c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1s.45-1 1-1h1c.55 0 1 .45 1 1z"/></svg><svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9.37 5.51C9.19 6.15 9.1 6.82 9.1 7.5c0 4.08 3.32 7.4 7.4 7.4.68 0 1.35-.09 1.99-.27C17.45 17.19 14.93 19 12 19c-3.86 0-7-3.14-7-7 0-2.93 1.81-5.45 4.37-6.49zM12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.64-.11 2.4-.32.06-.02.12-.05.18-.08.06-.03.12-.07.18-.11.53-.36.94-.84 1.2-1.4.26-.56.34-1.18.24-1.79-.1-.61-.4-1.17-.83-1.63-.44-.46-1.01-.8-1.63-1.03-.62-.23-1.28-.27-1.93-.11-.65.16-1.26.51-1.73 1.01-.47.5-.8 1.11-.96 1.77-.16.66-.12 1.34.11 1.98.23.64.65 1.18 1.2 1.56.55.38 1.2.58 1.87.58.79 0 1.55-.26 2.17-.75.62-.49 1.08-1.16 1.34-1.9.02-.05.03-.1.05-.15.01-.06.03-.12.04-.18.02-.05.03-.1.04-.16.14-.35.22-.72.22-1.1 0-1.04-.49-1.97-1.23-2.71C15.97 4.49 14.04 3 12 3z"/></svg></button>
+        <button id="collapse-btn" title="Toggle chat panel"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg></button>
+        <div class="chat-header"><div class="title-container"><a href="../index.html" style="text-decoration: none; color: inherit;"><h1 class="main-title">MapMyCampus</h1></a></div></div>
+        <div class="messages"><div id="messages-container"></div></div>
+        <div class="input-area"><input type="text" id="userInput" placeholder="Ask a question..."/><a href="../IISER_2D/campus2D.html" id="gmaps-btn" title="Go to 2D Map"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5-2.5-1.12-2.5-2.5-2.5z"/></svg></a><button id="mic-btn" title="Ask with voice"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11h-1c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92z"/></svg></button><button id="send-btn" class="send-button" title="Send message"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button></div>
     </div>
 
-    <model-viewer 
-        id="map"
-        src="IISER.glb"
-        alt="A 3D map of the IISER campus"
-        camera-controls
-        ar
-        ar-modes="webxr scene-viewer quick-look"
-        tone-mapping="neutral"
-        poster="poster.webp"
-        shadow-intensity="0.8"
-        min-camera-orbit="auto"
-        max-camera-orbit="auto"
-        min-field-of-view="5deg">
+    <div class="map-wrapper" id="map-wrapper">
+        <canvas id="tour-canvas"></canvas>
+        <model-viewer 
+            id="map"
+            src="https://raw.githubusercontent.com/ASHISH-28-02/MapMyCampus/main/Frontend/IISER_3D/IISER.glb"
+            alt="A 3D map of the IISER campus"
+            camera-controls ar ar-modes="webxr scene-viewer quick-look"
+            tone-mapping="neutral" poster="poster.webp" shadow-intensity="0.8"
+            min-camera-orbit="auto" max-camera-orbit="auto" min-field-of-view="5deg">
+            
+            <button class="hotspot" slot="hotspot-1" data-position="78.99m 116.16m 460.25m" data-normal="-0.48m 0m 0.87m" data-name="IISER TVM Second gate" data-aliases="second gate,gate 2"><div class="hotspot-annotation">IISER TVM Second gate</div></button>
+            <button class="hotspot" slot="hotspot-2" data-position="193.14m 128.21m 526.31m" data-normal="0.80m 0m 0.59m" data-name="Indoor Sports Complex" data-aliases="indoor stadium,sports complex"><div class="hotspot-annotation">Indoor Sports Complex</div></button>
+            <button class="hotspot" slot="hotspot-3" data-position="318.45m 137.27m 549.39m" data-normal="0.01m 0.99m -0.08m" data-name="Anamudi Block" data-aliases="anamudi"><div class="hotspot-annotation">Anamudi Block</div></button>
+            <button class="hotspot" slot="hotspot-4" data-position="312.38m 129.25m 382.30m" data-normal="-0.42m 0m 0.90m" data-name="PhD Hostel Block 5" data-aliases="phd hostel 5,block 5"><div class="hotspot-annotation">PhD Hostel Block 5</div></button>
+            <button class="hotspot" slot="hotspot-5" data-position="327.43m 142.19m 348.86m" data-normal="-0.22m 0.94m 0.24m" data-name="PhD Hostel Block 4" data-aliases="phd hostel 4,block 4"><div class="hotspot-annotation">PhD Hostel Block 4</div></button>
+            <button class="hotspot" slot="hotspot-6" data-position="249.41m 134.82m 298.40m" data-normal="-0.18m 0.95m 0.23m" data-name="PhD Hostel Block 3" data-aliases="phd hostel 3,block 3"><div class="hotspot-annotation">PhD Hostel Block 3</div></button>
+            <button class="hotspot" slot="hotspot-7" data-position="235.95m 119.93m 332.48m" data-normal="-0.36m 0m 0.93m" data-name="PhD Hostel Block 6" data-aliases="phd hostel 6,block 6"><div class="hotspot-annotation">PhD Hostel Block 6</div></button>
+            <button class="hotspot" slot="hotspot-8" data-position="359.33m 149.36m 329.97m" data-normal="-0.20m 0.96m 0.13m" data-name="Agasthya" data-aliases="agasthya hostel"><div class="hotspot-annotation">Agasthya</div></button>
+            <button class="hotspot" slot="hotspot-9" data-position="280.47m 146.58m 271.49m" data-normal="-0.15m 0.95m 0.23m" data-name="Ponmudi" data-aliases="ponmudi hostel"><div class="hotspot-annotation">Ponmudi</div></button>
+            <button class="hotspot" slot="hotspot-10" data-position="347.53m 154.65m 276.91m" data-normal="-0.10m 0.97m 0.18m" data-name="Central Dining Hall" data-aliases="cdh,mess hall,canteen"><div class="hotspot-annotation">Central Dining Hall</div></button>
+            <button class="hotspot" slot="hotspot-11" data-position="406.22m 158.24m 293.27m" data-normal="-0.08m 0.98m 0.17m" data-name="IISER Substation 2" data-aliases="substation 2"><div class="hotspot-annotation">IISER Substation 2</div></button>
+            <button class="hotspot" slot="hotspot-12" data-position="500.53m 196.21m 208.16m" data-normal="-0.12m 0.98m 0.09m" data-name="Animal House" data-aliases="animal facility"><div class="hotspot-annotation">Animal House</div></button>
+            <button class="hotspot" slot="hotspot-13" data-position="417.93m 190.55m 152.58m" data-normal="-0.12m 0.98m -0.08m" data-name="Dept. of Biological Sciences" data-aliases="biology department,bio block"><div class="hotspot-annotation">Dept. of Biological Sciences</div></button>
+            <button class="hotspot" slot="hotspot-14" data-position="320.62m 172.92m 101.76m" data-normal="-0.08m 0.99m -0.01m" data-name="Dept. of Chemical Sciences" data-aliases="chemistry department,chem block"><div class="hotspot-annotation">Dept. of Chemical Sciences</div></button>
+            <button class="hotspot" slot="hotspot-15" data-position="258.20m 159.48m 97.95m" data-normal="-0.95m 0m -0.30m" data-name="MOBEL Lab" data-aliases="mobel"><div class="hotspot-annotation">MOBEL Lab</div></button>
+            <button class="hotspot" slot="hotspot-16" data-position="196.87m 166.10m 59.70m" data-normal="0.01m 0.99m -0.01m" data-name="Dept. of Physical Sciences" data-aliases="physics department,physics block"><div class="hotspot-annotation">Dept. of Physical Sciences</div></button>
+            <button class="hotspot" slot="hotspot-17" data-position="176.71m 166.55m -43.85m" data-normal="-0.08m 0.98m 0.14m" data-name="Lecture Hall Complex" data-aliases="lhc"><div class="hotspot-annotation">Lecture Hall Complex</div></button>
+            <button class="hotspot" slot="hotspot-18" data-position="-62.55m 147.33m -109.67m" data-normal="-0.04m 0.99m -0.08m" data-name="Shopping Complex" data-aliases="shopcom,shops"><div class="hotspot-annotation">Shopping Complex</div></button>
+            <button class="hotspot" slot="hotspot-19" data-position="-92.75m 138.40m -42.56m" data-normal="-0.46m 0m 0.88m" data-name="Health Centre" data-aliases="clinic,hospital"><div class="hotspot-annotation">Health Centre</div></button>
+            <button class="hotspot" slot="hotspot-20" data-position="-31.60m 136.84m 86.18m" data-normal="-0.24m 0.96m 0.05m" data-name="Visitors Forest Retreat" data-aliases="guest house,forest retreat"><div class="hotspot-annotation">Visitors Forest Retreat</div></button>
+            <button class="hotspot" slot="hotspot-21" data-position="70.30m 146.46m 143.39m" data-normal="-0.21m 0.96m 0.16m" data-name="Central Library" data-aliases="library"><div class="hotspot-annotation">Central Library</div></button>
+            <button class="hotspot" slot="hotspot-22" data-position="117.65m 134.44m 217.22m" data-normal="-0.01m 0.95m 0.29m" data-name="Tasty Restaurant" data-aliases="tasty"><div class="hotspot-annotation">Tasty Restaurant</div></button>
+            <button class="hotspot" slot="hotspot-23" data-position="-711.03m 121.53m -306.61m" data-normal="0.36m 0m 0.93m" data-name="Residence Block" data-aliases="apartments,faculty housing"><div class="hotspot-annotation">Residence Block</div></button>
+            <button class="hotspot" slot="hotspot-24" data-position="-559.21m 168.22m -363.05m" data-normal="0.85m 0m 0.51m" data-name="Director's Bungalow" data-aliases="director house"><div class="hotspot-annotation">Director's Bungalow</div></button>
+            <button class="hotspot" slot="hotspot-25" data-position="-649.36m 151.16m -414.41m" data-normal="0.92m 0m 0.37m" data-name="IISER Substation 3" data-aliases="substation 3"><div class="hotspot-annotation">IISER Substation 3</div></button>
+            
+            <!-- **THE FIX:** The marker is now back in the HTML where it belongs -->
+            <div id="marker" class="marker" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/>
+                </svg>
+            </div>
+        </model-viewer>
 
-        <button class="hotspot" slot="hotspot-1" data-position="78.99m 116.16m 460.25m" data-normal="-0.48m 0m 0.87m" data-name="IISER TVM Second gate" data-aliases="second gate,gate 2">
-            <div class="hotspot-annotation">IISER TVM Second gate</div>
+        <button id="tour-btn">
+            <div class="start-tour-content">
+                <span>START TOUR</span>
+            </div>
+            <div class="end-tour-content">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"></path></svg>
+            </div>
         </button>
-        <button class="hotspot" slot="hotspot-2" data-position="193.14m 128.21m 526.31m" data-normal="0.80m 0m 0.59m" data-name="Indoor Sports Complex" data-aliases="indoor stadium,sports complex">
-            <div class="hotspot-annotation">Indoor Sports Complex</div>
-        </button>
-        <button class="hotspot" slot="hotspot-3" data-position="318.45m 137.27m 549.39m" data-normal="0.01m 0.99m -0.08m" data-name="Anamudi Block" data-aliases="anamudi">
-            <div class="hotspot-annotation">Anamudi Block</div>
-        </button>
-        <button class="hotspot" slot="hotspot-4" data-position="312.38m 129.25m 382.30m" data-normal="-0.42m 0m 0.90m" data-name="PhD Hostel Block 5" data-aliases="phd hostel 5,block 5">
-            <div class="hotspot-annotation">PhD Hostel Block 5</div>
-        </button>
-        <button class="hotspot" slot="hotspot-5" data-position="327.43m 142.19m 348.86m" data-normal="-0.22m 0.94m 0.24m" data-name="PhD Hostel Block 4" data-aliases="phd hostel 4,block 4">
-            <div class="hotspot-annotation">PhD Hostel Block 4</div>
-        </button>
-        <button class="hotspot" slot="hotspot-6" data-position="249.41m 134.82m 298.40m" data-normal="-0.18m 0.95m 0.23m" data-name="PhD Hostel Block 3" data-aliases="phd hostel 3,block 3">
-            <div class="hotspot-annotation">PhD Hostel Block 3</div>
-        </button>
-        <button class="hotspot" slot="hotspot-7" data-position="235.95m 119.93m 332.48m" data-normal="-0.36m 0m 0.93m" data-name="PhD Hostel Block 6" data-aliases="phd hostel 6,block 6">
-            <div class="hotspot-annotation">PhD Hostel Block 6</div>
-        </button>
-        <button class="hotspot" slot="hotspot-8" data-position="359.33m 149.36m 329.97m" data-normal="-0.20m 0.96m 0.13m" data-name="Agasthya" data-aliases="agasthya hostel">
-            <div class="hotspot-annotation">Agasthya</div>
-        </button>
-        <button class="hotspot" slot="hotspot-9" data-position="280.47m 146.58m 271.49m" data-normal="-0.15m 0.95m 0.23m" data-name="Ponmudi" data-aliases="ponmudi hostel">
-            <div class="hotspot-annotation">Ponmudi</div>
-        </button>
-        <button class="hotspot" slot="hotspot-10" data-position="347.53m 154.65m 276.91m" data-normal="-0.10m 0.97m 0.18m" data-name="Central Dining Hall" data-aliases="cdh,mess hall,canteen">
-            <div class="hotspot-annotation">Central Dining Hall</div>
-        </button>
-        <button class="hotspot" slot="hotspot-11" data-position="406.22m 158.24m 293.27m" data-normal="-0.08m 0.98m 0.17m" data-name="IISER Substation 2" data-aliases="substation 2">
-            <div class="hotspot-annotation">IISER Substation 2</div>
-        </button>
-        <button class="hotspot" slot="hotspot-12" data-position="500.53m 196.21m 208.16m" data-normal="-0.12m 0.98m 0.09m" data-name="Animal House" data-aliases="animal facility">
-            <div class="hotspot-annotation">Animal House</div>
-        </button>
-        <button class="hotspot" slot="hotspot-13" data-position="417.93m 190.55m 152.58m" data-normal="-0.12m 0.98m -0.08m" data-name="Dept. of Biological Sciences" data-aliases="biology department,bio block">
-            <div class="hotspot-annotation">Dept. of Biological Sciences</div>
-        </button>
-        <button class="hotspot" slot="hotspot-14" data-position="320.62m 172.92m 101.76m" data-normal="-0.08m 0.99m -0.01m" data-name="Dept. of Chemical Sciences" data-aliases="chemistry department,chem block">
-            <div class="hotspot-annotation">Dept. of Chemical Sciences</div>
-        </button>
-        <button class="hotspot" slot="hotspot-15" data-position="258.20m 159.48m 97.95m" data-normal="-0.95m 0m -0.30m" data-name="MOBEL Lab" data-aliases="mobel">
-            <div class="hotspot-annotation">MOBEL Lab</div>
-        </button>
-        <button class="hotspot" slot="hotspot-16" data-position="196.87m 166.10m 59.70m" data-normal="0.01m 0.99m -0.01m" data-name="Dept. of Physical Sciences" data-aliases="physics department,physics block">
-            <div class="hotspot-annotation">Dept. of Physical Sciences</div>
-        </button>
-        <button class="hotspot" slot="hotspot-17" data-position="176.71m 166.55m -43.85m" data-normal="-0.08m 0.98m 0.14m" data-name="Lecture Hall Complex" data-aliases="lhc">
-            <div class="hotspot-annotation">Lecture Hall Complex</div>
-        </button>
-        <button class="hotspot" slot="hotspot-18" data-position="-62.55m 147.33m -109.67m" data-normal="-0.04m 0.99m -0.08m" data-name="Shopping Complex" data-aliases="shopcom,shops">
-            <div class="hotspot-annotation">Shopping Complex</div>
-        </button>
-        <button class="hotspot" slot="hotspot-19" data-position="-92.75m 138.40m -42.56m" data-normal="-0.46m 0m 0.88m" data-name="Health Centre" data-aliases="clinic,hospital">
-            <div class="hotspot-annotation">Health Centre</div>
-        </button>
-        <button class="hotspot" slot="hotspot-20" data-position="-31.60m 136.84m 86.18m" data-normal="-0.24m 0.96m 0.05m" data-name="Visitors Forest Retreat" data-aliases="guest house,forest retreat">
-            <div class="hotspot-annotation">Visitors Forest Retreat</div>
-        </button>
-        <button class="hotspot" slot="hotspot-21" data-position="70.30m 146.46m 143.39m" data-normal="-0.21m 0.96m 0.16m" data-name="Central Library" data-aliases="library">
-            <div class="hotspot-annotation">Central Library</div>
-        </button>
-        <button class="hotspot" slot="hotspot-22" data-position="117.65m 134.44m 217.22m" data-normal="-0.01m 0.95m 0.29m" data-name="Tasty Restaurant" data-aliases="tasty">
-            <div class="hotspot-annotation">Tasty Restaurant</div>
-        </button>
-        <button class="hotspot" slot="hotspot-23" data-position="-711.03m 121.53m -306.61m" data-normal="0.36m 0m 0.93m" data-name="Residence Block" data-aliases="apartments,faculty housing">
-            <div class="hotspot-annotation">Residence Block</div>
-        </button>
-        <button class="hotspot" slot="hotspot-24" data-position="-559.21m 168.22m -363.05m" data-normal="0.85m 0m 0.51m" data-name="Director's Bungalow" data-aliases="director house">
-            <div class="hotspot-annotation">Director's Bungalow</div>
-        </button>
-        <button class="hotspot" slot="hotspot-25" data-position="-649.36m 151.16m -414.41m" data-normal="0.92m 0m 0.37m" data-name="IISER Substation 3" data-aliases="substation 3">
-            <div class="hotspot-annotation">IISER Substation 3</div>
-        </button>
-        
-        <div id="marker" class="marker">
-             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/>
-             </svg>
-        </div>
 
-    </model-viewer>
+        <div id="loader-container"><div>Loading Tour...</div></div>
+    </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
