@@ -124,3 +124,28 @@ function onMouseMove(event) {
 
 // --- INITIALIZE ---
 init();
+
+// --- REPEATING SCROLL ANIMATION LOGIC ---
+const sectionsToAnimate = document.querySelectorAll('.info-section:not(.hero-section)');
+
+const observerOptions = {
+  root: null, 
+  rootMargin: '0px',
+  threshold: 0.25 // A good balance for triggering
+};
+
+const observer = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    // If the section is in view, add the class to trigger the animation
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+    } else {
+      // If the section is out of view, remove the class to reset the animation
+      entry.target.classList.remove('is-visible');
+    }
+  });
+}, observerOptions);
+
+sectionsToAnimate.forEach(section => {
+  observer.observe(section);
+});

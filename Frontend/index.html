@@ -8,7 +8,7 @@
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Link to your external stylesheet -->
     <link rel="stylesheet" href="style.css">
@@ -17,11 +17,102 @@
 
     <canvas id="webgl-canvas"></canvas>
 
-    <div class="content-container">
-        <h1>MapMyCampus</h1>
-        <p>Visualize your campus in a new dimension.</p>
-        <a href="IISER_2D/campus2D.html" class="launch-button">EXPLORE</a>
-    </div>
+    <main class="scroll-container">
+        <!-- Section 1: Hero -->
+        <section class="hero-section info-section">
+            <div class="content-container">
+                <h1>MapMyCampus</h1>
+                <p>Visualize your campus in a new dimension.</p>
+                <a href="IISER_2D/campus2D.html" class="launch-button">EXPLORE</a>
+            </div>
+        </section>
+
+        <!-- Section 2: Features Showcase Part 1 -->
+        <section id="about-section" class="info-section">
+            <h2>A Campus Companion Reimagined</h2>
+            <div class="feature-showcase">
+                <!-- Feature 1 -->
+                <div class="feature-row">
+                    <div class="feature-text">
+                        <h4>Conversational AI Assistant</h4>
+                        <p>Simply ask for directions or information. Our AI understands natural language to guide you, making navigation effortless and intuitive.</p>
+                    </div>
+                    <div class="feature-visual">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.929,19.071,3.515,17.657a1,1,0,0,1,1.414-1.414l1.414,1.414a1,1,0,0,1-1.414,1.414Zm14.142,0a1,1,0,0,1-1.414-1.414l1.414-1.414a1,1,0,0,1,1.414,1.414ZM12,6a1,1,0,1,1,1-1A1,1,0,0,1,12,6ZM7,12a1,1,0,1,1,1-1A1,1,0,0,1,7,12Zm10,0a1,1,0,1,1,1-1A1,1,0,0,1,17,12Zm-3,5a1,1,0,1,1,1-1A1,1,0,0,1,14,17Zm-6,0a1,1,0,1,1,1-1A1,1,0,0,1,8,17Zm4-5a3,3,0,1,1,3-3A3,3,0,0,1,12,12Zm5.071-5.556a1,1,0,0,1-.035,1.414l-1.414,1.414a1,1,0,0,1-1.414-1.414l1.414-1.414a1,1,0,0,1,1.449-.035ZM6.343,7.757,4.929,6.343a1,1,0,0,1,1.414-1.414L7.757,6.343a1,1,0,0,1-1.414,1.414Z"/></svg>
+                    </div>
+                </div>
+                <!-- Feature 2 -->
+                <div class="feature-row">
+                    <div class="feature-text">
+                        <h4>Dual Map Views</h4>
+                        <p>Experience your campus like never before. Instantly switch between a familiar 2D map and a stunning, immersive 3D digital twin.</p>
+                    </div>
+                     <div class="feature-visual">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21,3H3A2,2,0,0,0,1,5V19a2,2,0,0,0,2,2H21a2,2,0,0,0,2-2V5A2,2,0,0,0,21,3ZM3,19V5H13l-4,4-4,4v6Zm18,0H15V13l4-4,4-4V19Z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Features Showcase Part 2 -->
+        <section id="features-continued" class="info-section">
+             <div class="feature-showcase">
+                <!-- Feature 3 -->
+                <div class="feature-row">
+                    <div class="feature-text">
+                        <h4>Hands-Free Voice Control</h4>
+                        <p>Stay focused on your surroundings. Use intuitive voice commands to navigate and receive clear, audible directions on the go.</p>
+                    </div>
+                    <div class="feature-visual">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12,14a3,3,0,0,0,3-3V5A3,3,0,0,0,9,5v6A3,3,0,0,0,12,14Zm6.18-3A1,1,0,0,0,17,12a5,5,0,0,1-9.9,1,1,1,0,1,0-1.9,0A7,7,0,0,0,12,21a1,1,0,0,0,0-2,5,5,0,0,1,0-10,1,1,0,0,0,0-2Z"/></svg>
+                    </div>
+                </div>
+                <!-- Feature 4 -->
+                <div class="feature-row">
+                    <div class="feature-text">
+                        <h4>Immersive 3D Tour</h4>
+                        <p>Take a virtual walk through a detailed 3D simulation of the campus. The responsive design works seamlessly on desktop, tablet, or phone.</p>
+                    </div>
+                     <div class="feature-visual">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5,14.5l-3-3a1,1,0,0,0-1.42,1.42L17.59,14.5,14,18.09,12.41,16.5l-3-3a1,1,0,0,0-1.42,0,1,1,0,0,0,0,1.42l3,3a1,1,0,0,0,1.42,0L14,16.59l3.5,3.5a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42ZM21,4.26A1,1,0,0,0,20,4H4A1,1,0,0,0,4,6H20A1,1,0,0,0,21,5.74ZM3.41,8.59,2,10,8,16l1.41-1.41ZM20,8H13a1,1,0,0,0,0,2h7a1,1,0,0,0,0-2Z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Creators -->
+        <section id="creators-section" class="info-section">
+            <h2>The Creators</h2>
+            <div class="creators-grid">
+                <div class="creator-card">
+                    <img src="https://github.com/ASHISH-28-02.png" alt="Ashish B">
+                    <h3>Ashish B</h3>
+                    <div class="social-links">
+                        <a href="https://github.com/ASHISH-28-02" target="_blank" aria-label="GitHub Profile">
+                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10,0,0,0,2,12C2,16.42,4.87,20.17,9.2,21.5C9.7,21.58,9.9,21.23,9.9,20.92V18.9C7.11,19.45,6.5,17.77,6.5,17.77C6,16.5,5.3,16.15,5.3,16.15C4.34,15.47,5.38,15.48,5.38,15.48C6.44,15.56,7,16.45,7,16.45C7.9,18,9.37,17.5,9.9,17.25C9.97,16.68,10.2,16.28,10.45,16.05C8,15.75,5.45,14.8,5.45,11.2C5.45,10.1,5.83,9.2,6.45,8.5C6.35,8.25,6,7.2,6.55,6.15C6.55,6.15,7.45,5.85,9.9,7.5C10.75,7.25,11.65,7.15,12.55,7.15C13.45,7.15,14.35,7.25,15.2,7.5C17.65,5.85,18.55,6.15,18.55,6.15C19.1,7.2,18.75,8.25,18.65,8.5C19.27,9.2,19.65,10.1,19.65,11.2C19.65,14.8,17.1,15.75,14.65,16.05C14.98,16.33,15.25,16.88,15.25,17.8V20.92C15.25,21.23,15.4,21.58,15.9,21.5C20.23,20.17,23,16.42,23,12A10,10,0,0,0,12,2Z"/></svg>
+                        </a>
+                        <a href="https://www.linkedin.com/in/ashishb2005" target="_blank" aria-label="LinkedIn Profile">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="creator-card">
+                    <img src="https://github.com/Rayhana27.png" alt="Rayhana S">
+                    <h3>Rayhana S</h3>
+                    <div class="social-links">
+                        <a href="https://github.com/Rayhana27" target="_blank" aria-label="GitHub Profile">
+                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10,0,0,0,2,12C2,16.42,4.87,20.17,9.2,21.5C9.7,21.58,9.9,21.23,9.9,20.92V18.9C7.11,19.45,6.5,17.77,6.5,17.77C6,16.5,5.3,16.15,5.3,16.15C4.34,15.47,5.38,15.48,5.38,15.48C6.44,15.56,7,16.45,7,16.45C7.9,18,9.37,17.5,9.9,17.25C9.97,16.68,10.2,16.28,10.45,16.05C8,15.75,5.45,14.8,5.45,11.2C5.45,10.1,5.83,9.2,6.45,8.5C6.35,8.25,6,7.2,6.55,6.15C6.55,6.15,7.45,5.85,9.9,7.5C10.75,7.25,11.65,7.15,12.55,7.15C13.45,7.15,14.35,7.25,15.2,7.5C17.65,5.85,18.55,6.15,18.55,6.15C19.1,7.2,18.75,8.25,18.65,8.5C19.27,9.2,19.65,10.1,19.65,11.2C19.65,14.8,17.1,15.75,14.65,16.05C14.98,16.33,15.25,16.88,15.25,17.8V20.92C15.25,21.23,15.4,21.58,15.9,21.5C20.23,20.17,23,16.42,23,12A10,10,0,0,0,12,2Z"/></svg>
+                        </a>
+                        <a href="https://www.linkedin.com/in/rayhana-s-45b90926b/" target="_blank" aria-label="LinkedIn Profile">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <p class="copyright">&copy; 2025 MapMyCampus. All Rights Reserved.</p>
+        </section>
+
+    </main>
 
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
