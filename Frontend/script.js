@@ -149,3 +149,56 @@ const observer = new IntersectionObserver((entries, observer) => {
 sectionsToAnimate.forEach(section => {
   observer.observe(section);
 });
+
+// --- EASTER EGG: DANGER THEME ON 5 CLICKS (INDIVIDUAL CARDS) ---
+
+// A reusable function to change the theme to red
+function activateDangerTheme() {
+    const dangerRed = '#E53935';
+    
+    // Prevent the function from running again if the theme is already red
+    if (document.documentElement.style.getPropertyValue('--accent-color') === dangerRed) {
+        return;
+    }
+
+    // 1. Update the CSS root variable for the entire UI
+    document.documentElement.style.setProperty('--accent-color', dangerRed);
+
+    // 2. Update the colors in the Three.js scene
+    const directionalLight = scene.children.find(child => child instanceof THREE.DirectionalLight);
+    if (directionalLight) {
+        directionalLight.color.set(dangerRed);
+    }
+
+    if (plane && plane.material) {
+        plane.material.color.set(dangerRed);
+    }
+    if (particles && particles.material) {
+        particles.material.color.set(dangerRed);
+    }
+    console.log("Secret theme activated!");
+}
+
+// Attach listener to Ashish's card
+const ashishCard = document.getElementById('ashish-card');
+if (ashishCard) {
+    let clickCount = 0;
+    ashishCard.addEventListener('click', () => {
+        clickCount++;
+        if (clickCount === 5) {
+            activateDangerTheme();
+        }
+    });
+}
+
+// Attach listener to Rayhana's card
+const rayhanaCard = document.getElementById('rayhana-card');
+if (rayhanaCard) {
+    let clickCount = 0;
+    rayhanaCard.addEventListener('click', () => {
+        clickCount++;
+        if (clickCount === 5) {
+            activateDangerTheme();
+        }
+    });
+}
