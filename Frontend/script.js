@@ -153,52 +153,77 @@ sectionsToAnimate.forEach(section => {
 // --- EASTER EGG: DANGER THEME ON 5 CLICKS (INDIVIDUAL CARDS) ---
 
 // A reusable function to change the theme to red
-function activateDangerTheme() {
-    const dangerRed = '#E53935';
-    
-    // Prevent the function from running again if the theme is already red
-    if (document.documentElement.style.getPropertyValue('--accent-color') === dangerRed) {
-        return;
-    }
+/**
+ * Activates the "Danger" theme (red).
+ */
+// --- SETUP: Store original colors before any changes ---
+const originalColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+const dangerRed = '#E53935';
+const sciFiViolet = '#9D00FF' // Changed from lavender to pink
 
+/**
+ * A general function to set the color theme for the UI and the Three.js scene.
+ * @param {string} color - The hex color code to apply.
+ */
+function setTheme(color) {
     // 1. Update the CSS root variable for the entire UI
-    document.documentElement.style.setProperty('--accent-color', dangerRed);
+    document.documentElement.style.setProperty('--accent-color', color);
 
     // 2. Update the colors in the Three.js scene
     const directionalLight = scene.children.find(child => child instanceof THREE.DirectionalLight);
     if (directionalLight) {
-        directionalLight.color.set(dangerRed);
+        directionalLight.color.set(color);
     }
-
     if (plane && plane.material) {
-        plane.material.color.set(dangerRed);
+        plane.material.color.set(color);
     }
     if (particles && particles.material) {
-        particles.material.color.set(dangerRed);
+        particles.material.color.set(color);
     }
-    console.log("Secret theme activated!");
 }
 
-// Attach listener to Ashish's card
+/**
+ * Toggles a theme on or off. If the theme is already active, it reverts to the original color.
+ * @param {string} targetColor - The color of the theme to toggle.
+ * @param {string} themeName - The name of the theme for logging.
+ */
+function toggleTheme(targetColor, themeName) {
+    const currentColor = document.documentElement.style.getPropertyValue('--accent-color');
+
+    // If the current theme is the one we're trying to activate, revert to original.
+    if (currentColor === targetColor) {
+        setTheme(originalColor);
+        console.log(`${themeName} theme deactivated.`);
+    } else { // Otherwise, set the new theme.
+        setTheme(targetColor);
+        console.log(`Secret ${themeName} theme activated!`);
+    }
+}
+
+// --- EVENT LISTENERS ---
+
+// Attach listener to Ashish's card to toggle Danger Mode
 const ashishCard = document.getElementById('ashish-card');
 if (ashishCard) {
     let clickCount = 0;
     ashishCard.addEventListener('click', () => {
         clickCount++;
         if (clickCount === 5) {
-            activateDangerTheme();
+            toggleTheme(dangerRed, 'Danger');
+            clickCount = 0; // Reset counter to allow toggling off later
         }
     });
 }
 
-// Attach listener to Rayhana's card
+// Attach listener to Rayhana's card to toggle Sci-Fi Violet Mode
 const rayhanaCard = document.getElementById('rayhana-card');
 if (rayhanaCard) {
     let clickCount = 0;
     rayhanaCard.addEventListener('click', () => {
         clickCount++;
         if (clickCount === 5) {
-            activateDangerTheme();
+            toggleTheme(sciFiViolet, 'Sci-Fi Violet');
+            clickCount = 0; // Reset counter to allow toggling off later
         }
     });
 }
