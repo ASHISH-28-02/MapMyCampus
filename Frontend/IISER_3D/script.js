@@ -313,13 +313,19 @@ function startTour() {
 
 function endTour() {
     document.body.classList.remove('tour-active');
+    
+    // FIX: Ensure the chat container is collapsed after the tour on mobile.
+    if (window.innerWidth <= 768) {
+        chatContainer.classList.add('collapsed');
+    }
+
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
     animationFrameId = null;
-    if(clock) clock.stop();
+    if (clock) clock.stop();
     if (labelRenderer && labelRenderer.domElement.parentNode) {
         labelRenderer.domElement.parentNode.removeChild(labelRenderer.domElement);
     }
-    tourInitialized = false; 
+    tourInitialized = false;
     labelRenderer = null;
 }
 
